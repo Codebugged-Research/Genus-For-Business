@@ -44,14 +44,34 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
+const io = require('socket.io-client');
+
 function CreateScreen(){
 
     const classes = useStyles();
     const [formState, setFormState] = useState("");
 
+    const [name, setName] = useState("");
+    const [code, setCode] = useState("");
+    const [username, setUsername] = useState("");
+
+    const handleFormState = (set) => {
+        setFormState(set);
+        setName("");
+        setCode("");
+        setUsername("");
+    }
+
     const handleCreate = (e) => {
         e.preventDefault();
 
+        // no requirement of alert.
+    }
+
+    const handleJoin = (e) => {
+        e.preventDefault();
+
+        // check whether the meeting exists or not. If yes, then connect otherwise alert.
     }
 
     return(
@@ -63,17 +83,19 @@ function CreateScreen(){
                         className={classes.btnStyle} 
                         style={{backgroundColor: '#202950'}} 
                         variant="contained"
-                        onClick={() => setFormState("create")}
+                        onClick={() => handleFormState("create")}
                     >
                         Create Meeting
                     </Button>
                     <div className={classes.createForm} style={{display: formState === "create" ? 'flex' : 'none'}}>
-                        <form style={{width: '100%'}}>
+                        <form style={{width: '100%'}} onSubmit={handleCreate}>
                             <TextField 
                                 required
                                 fullWidth
                                 label="Name"
                                 placeholder="Please enter your name"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
                             />
                             <Button 
                                 className={classes.btnStyle}
@@ -89,17 +111,29 @@ function CreateScreen(){
                         className={classes.btnStyle} 
                         style={{backgroundColor: '#202950'}} 
                         variant="contained"
-                        onClick={() => setFormState("join")}
+                        onClick={() => handleFormState("join")}
                     >
                         Join Meeting
                     </Button>
                     <div className={classes.createForm} style={{display: formState === "join" ? 'flex' : 'none'}}>
-                        <form style={{width: '100%'}}>
+                        <form style={{width: '100%'}} onSubmit={handleJoin}>
                             <TextField 
                                 required
                                 fullWidth
                                 label="Meeting Code"
                                 placeholder="Please enter the meeting code"
+                                value={code}
+                                onChange={e=>setCode(e.target.value)}
+                                style={{marginBottom: '7px', fontFamily: 'Nunito', fontWeight: '600'}}
+                            />
+                            <TextField 
+                                required
+                                fullWidth
+                                label="Name"
+                                placeholder="Please enter your name"
+                                value={username}
+                                onChange={e=>setUsername(e.target.value)}
+                                style={{fontFamily: 'Nunito', fontWeight: '600'}}
                             />
                             <Button 
                                 className={classes.btnStyle}
