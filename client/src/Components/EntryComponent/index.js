@@ -4,6 +4,9 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+import Alert from '@material-ui/lab/Alert';
+import AlertTitle from '@material-ui/lab/AlertTitle';
+import Snackbar from '@material-ui/core/Snackbar';
 import {
     Container,
     Section
@@ -40,15 +43,29 @@ function JoinScreen({match, history}){
     const classes = useStyles();
 
     const [username, setUsername] = useState("");
-    const joinViaLink = () => {
-        setLocalStorage(username);
-        history.push(`meet/${match.meetId}`)
+    const [open, setOpen] = useState(false);
+    const handleClose = () => {
+        setUsername("");
+        setOpen(false);
+    }
+
+    const handleJoinLink = (status) => {
+        if(status === "joined"){
+            setLocalStorage(username);
+            history.push(`meet/${match.meetId}`)
+        } else {
+            setOpen(true);
+        }
     }
 
     const handleJoinWithLink = (e) => {
         e.preventDefault();
+        const data = {
+            name: username,
+            meetId: match.meetId
+        }
 
-        socket.emit('joinLinkMeet', username, joinViaLink);
+        socket.emit('joinMeet', data, handleJoinLink);
     }
 
     return(
@@ -77,6 +94,15 @@ function JoinScreen({match, history}){
                     </form>
                 </Section>
             </Paper>
+            <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'right'}} open={open} autoHideDuration={3000} onClose={handleClose}>
+                <Alert severity="info" variant="filled" onClose={() => {
+                    setOpen(false)
+                    setUsername("")
+                }}>
+                    <AlertTitle>Wrong Meeting Code</AlertTitle>
+                    A meeting with this code does not exist!
+                </Alert>
+            </Snackbar>
         </Container>
     )
 }
