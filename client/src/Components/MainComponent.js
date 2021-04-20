@@ -3,6 +3,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import JoinScreen from '../Components/EntryComponent';
 import CreateScreen from '../Components/CreateComponent';
 import Conference from '../Components/Conference';
+import PrivateRoute from '../Components/PrivateRoute';
 
 function Main(){
 
@@ -10,7 +11,7 @@ function Main(){
         <Switch>
             <Route exact path="/" component={(props) => <CreateScreen {...props} />} />
             <Route exact path="/join/:meetId" component={(props) => <JoinScreen {...props} /> } />
-            <Route exact path="/meet/:meetId" component={(props) => <Conference {...props} />} />
+            <PrivateRoute exact path="/meet/:meetId" component={(props) => <Conference {...props} />} />
             <Redirect to="/" />
         </Switch>
     )

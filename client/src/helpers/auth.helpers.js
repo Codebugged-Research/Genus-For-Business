@@ -1,4 +1,7 @@
 export const setLocalStorage = (value) => {
+    if(localStorage.getItem('name')){
+        localStorage.removeItem('name')
+    }
     localStorage.setItem('name', value);
 }
 

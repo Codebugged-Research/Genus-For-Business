@@ -108,7 +108,7 @@ function CreateScreen({history}){
     return(
         <Container>
             <Paper elevation={3} className={classes.paperStyle}>
-                <Typography className={classes.heading} variant="h4">User Actions</Typography>
+                <Typography className={classes.heading} variant="h4">Genus - User Actions</Typography>
                 <div className={classes.content}>
                     <Button 
                         className={classes.btnStyle} 
