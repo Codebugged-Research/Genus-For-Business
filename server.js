@@ -13,7 +13,10 @@ const io = require("socket.io")(server, {
 })
 
 io.on('connection', socket => {
-    
+
+    socket.on('connectUser', (name) => {
+        console.log(name);
+    })
 })
 
 server.listen(`${process.env.PORT}`, (req, res) => {

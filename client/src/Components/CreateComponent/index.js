@@ -45,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const io = require('socket.io-client');
+const socket = io('http://localhost:3001');
 
 function CreateScreen(){
 
@@ -65,7 +66,7 @@ function CreateScreen(){
     const handleCreate = (e) => {
         e.preventDefault();
 
-        // no requirement of alert.
+        socket.emit('connectUser', name);
     }
 
     const handleJoin = (e) => {
