@@ -12,14 +12,26 @@ const io = require("socket.io")(server, {
     }
 })
 
+function generateMeetId(){
+    const meetId = (new Date().getTime() * 5) % 100000000000;
+    return meetId;
+}
+
 const meetingUsers = {};
 
 io.on('connection', socket => {
 
     socket.on('createMeet', (name, createdMeeting) => {
-        const meetId = (new Date().getTime() * 5) % 100000000;
+        const meetId = generateMeetId();
 
-        createdMeeting(meetId);
+        if(!meetingUsers[meetId]){
+            meetingUsers[meetId] = [socket.id, name];
+            socket.join(meetId);
+
+            createdMeeting(meetId);   
+        } else {
+            createdMeeting(generateMeetId()); //second chance for generating a unique key
+        }
     })
 })
 
