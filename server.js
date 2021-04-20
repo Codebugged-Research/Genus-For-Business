@@ -12,10 +12,14 @@ const io = require("socket.io")(server, {
     }
 })
 
+const meetingUsers = {};
+
 io.on('connection', socket => {
 
-    socket.on('connectUser', (name) => {
-        console.log(name);
+    socket.on('createMeet', (name, createdMeeting) => {
+        const meetId = (new Date().getTime() * 5) % 100000000;
+
+        createdMeeting(meetId);
     })
 })
 

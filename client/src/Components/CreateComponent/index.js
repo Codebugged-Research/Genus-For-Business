@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 const io = require('socket.io-client');
 const socket = io('http://localhost:3001');
 
-function CreateScreen(){
+function CreateScreen({history}){
 
     const classes = useStyles();
     const [formState, setFormState] = useState("");
@@ -63,10 +63,14 @@ function CreateScreen(){
         setUsername("");
     }
 
+    const createdMeeting = (meetId) => {
+        history.push(`/meet/${meetId}`)
+    }
+
     const handleCreate = (e) => {
         e.preventDefault();
 
-        socket.emit('connectUser', name);
+        socket.emit('createMeet', name, createdMeeting);
     }
 
     const handleJoin = (e) => {
