@@ -8,6 +8,10 @@ import {
     Container,
     Section
 } from './JoinComponents';
+import { setLocalStorage } from '../../helpers/auth.helpers';
+
+const io = require('socket.io-client');
+const socket = io('http://localhost:3001');
 
 const useStyles = makeStyles((theme) => ({
     rootPaper:{
@@ -31,18 +35,28 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-function JoinScreen(){
+function JoinScreen({match, history}){
 
     const classes = useStyles();
 
     const [username, setUsername] = useState("");
+    const joinViaLink = () => {
+        setLocalStorage(username);
+        history.push(`meet/${match.meetId}`)
+    }
+
+    const handleJoinWithLink = (e) => {
+        e.preventDefault();
+
+        socket.emit('joinLinkMeet', username, joinViaLink);
+    }
 
     return(
         <Container>
             <Paper elevation={3} className = {classes.rootPaper}> 
                 <Typography variant="h4" className={classes.heading}>User Detail</Typography>
                 <Section>
-                    <form>
+                    <form onSubmit={handleJoinWithLink}>
                         <TextField 
                             required
                             fullWidth

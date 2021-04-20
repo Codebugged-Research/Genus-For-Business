@@ -41,6 +41,7 @@ io.on('connection', socket => {
             meetingUsers[data.meetId].push(socket.id, data.name);
 
             handleJoinResponse("joined");
+            io.to(data.meetId).emit("newJoinee", data.name);
         } else {
             handleJoinResponse("wrong");
         }
