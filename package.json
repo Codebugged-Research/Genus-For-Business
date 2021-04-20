@@ -1,0 +1,11 @@
+{
+  "name": "genus-corporate",
+  "version": "0.1.0",
+  "description": "This version of Genus is tailored specifically to suit the needs of the corporate world",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Devendra Pratap Singh",
+  "license": "ISC"
+}
