@@ -3,6 +3,8 @@ import { makeStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import {Alert, AlertTitle} from '@material-ui/lab/Alert';
 import {
     Container
 } from './CreateComponent';
@@ -35,8 +37,10 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(2),
         height: '100%'
     },
-    contentForm:{
-        display: 'flex'
+    createForm:{
+        display: 'flex',
+        width: '100%',
+        margin: theme.spacing(1)
     }
 }))
 
@@ -44,6 +48,11 @@ function CreateScreen(){
 
     const classes = useStyles();
     const [formState, setFormState] = useState("");
+
+    const handleCreate = (e) => {
+        e.preventDefault();
+
+    }
 
     return(
         <Container>
@@ -59,7 +68,22 @@ function CreateScreen(){
                         Create Meeting
                     </Button>
                     <div className={classes.createForm} style={{display: formState === "create" ? 'flex' : 'none'}}>
-                            hwodufwiui
+                        <form style={{width: '100%'}}>
+                            <TextField 
+                                required
+                                fullWidth
+                                label="Name"
+                                placeholder="Please enter your name"
+                            />
+                            <Button 
+                                className={classes.btnStyle}
+                                style={{backgroundColor: '#202950'}}
+                                variant="contained"
+                                type="submit"
+                            >
+                                Create
+                            </Button>
+                        </form>
                     </div>
                     <Button 
                         className={classes.btnStyle} 
@@ -69,8 +93,23 @@ function CreateScreen(){
                     >
                         Join Meeting
                     </Button>
-                    <div className={classes.joinForm} style={{display: formState === "join" ? 'flex' : 'none'}}>
-                    uwhefhefuuwiu
+                    <div className={classes.createForm} style={{display: formState === "join" ? 'flex' : 'none'}}>
+                        <form style={{width: '100%'}}>
+                            <TextField 
+                                required
+                                fullWidth
+                                label="Meeting Code"
+                                placeholder="Please enter the meeting code"
+                            />
+                            <Button 
+                                className={classes.btnStyle}
+                                style={{backgroundColor: '#202950'}}
+                                variant="contained"
+                                type="submit"
+                            >
+                                Join
+                            </Button>
+                        </form>
                     </div>
                 </div>
             </Paper>
