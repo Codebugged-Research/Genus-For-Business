@@ -84,11 +84,22 @@ function CreateScreen({history}){
 
         socket.emit('createMeet', name, createdMeeting);
     }
+    const handleJoinResponse = (status) => {
+        if(status === "joined"){
+            joinedMeeting();
+        } else {
+            wrongMeeting();
+        }
+    }
 
     const handleJoin = (e) => {
         e.preventDefault();
+        const data = {
+            name: username,
+            meetId: code
+        }
 
-        socket.emit('joinMeet', username, code, joinedMeeting, wrongMeeting);
+        socket.emit('joinMeet', data, handleJoinResponse);
     }
 
     return(

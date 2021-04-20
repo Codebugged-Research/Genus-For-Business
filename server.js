@@ -34,14 +34,15 @@ io.on('connection', socket => {
         }
     })
 
-    socket.on('joinMeet', (name, meetId, joinedMeeting, wrongMeeting) => {
+    socket.on('joinMeet', (data, handleJoinResponse) => {
 
-        if(meetingUsers[meetId]){
-            socket.join(meetId);
-            meetingUsers[meetId].push(socket.id, name);
-            joinedMeeting();
+        if(meetingUsers[data.meetId]){
+            socket.join(data.meetId);
+            meetingUsers[data.meetId].push(socket.id, data.name);
+
+            handleJoinResponse("joined");
         } else {
-            wrongMeeting();
+            handleJoinResponse("wrong");
         }
     })
 })
