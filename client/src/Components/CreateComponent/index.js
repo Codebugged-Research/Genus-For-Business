@@ -4,7 +4,9 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import {Alert, AlertTitle} from '@material-ui/lab/Alert';
+import Alert from '@material-ui/lab/Alert';
+import AlertTitle from '@material-ui/lab/AlertTitle';
+import Snackbar from '@material-ui/core/Snackbar';
 import {
     Container
 } from './CreateComponent';
@@ -55,6 +57,7 @@ function CreateScreen({history}){
     const [name, setName] = useState("");
     const [code, setCode] = useState("");
     const [username, setUsername] = useState("");
+    const [open, setOpen] = useState(false);
 
     const handleFormState = (set) => {
         setFormState(set);
@@ -66,6 +69,15 @@ function CreateScreen({history}){
     const createdMeeting = (meetId) => {
         history.push(`/meet/${meetId}`)
     }
+    const joinedMeeting = () => {
+        history.push(`/meet/${code}`);
+    }
+    const wrongMeeting = () => {
+        setOpen(true);
+    }
+    const handleClose = () => {
+        setOpen(false);
+    }
 
     const handleCreate = (e) => {
         e.preventDefault();
@@ -76,7 +88,7 @@ function CreateScreen({history}){
     const handleJoin = (e) => {
         e.preventDefault();
 
-        // check whether the meeting exists or not. If yes, then connect otherwise alert.
+        socket.emit('joinMeet', username, code, joinedMeeting, wrongMeeting);
     }
 
     return(
@@ -152,6 +164,12 @@ function CreateScreen({history}){
                     </div>
                 </div>
             </Paper>
+            <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'right'}} open={open} autoHideDuration={3000} onClose={handleClose}>
+                <Alert severity="info" variant="filled">
+                    <AlertTitle>Wrong Meeting Code</AlertTitle>
+                    A meeting with this code does not exist!
+                </Alert>
+            </Snackbar>
         </Container>
     )
 }

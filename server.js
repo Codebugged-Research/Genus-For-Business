@@ -33,6 +33,17 @@ io.on('connection', socket => {
             createdMeeting(generateMeetId()); //second chance for generating a unique key
         }
     })
+
+    socket.on('joinMeet', (name, meetId, joinedMeeting, wrongMeeting) => {
+
+        if(meetingUsers[meetId]){
+            socket.join(meetId);
+            meetingUsers[meetId].push(socket.id, name);
+            joinedMeeting();
+        } else {
+            wrongMeeting();
+        }
+    })
 })
 
 server.listen(`${process.env.PORT}`, (req, res) => {
