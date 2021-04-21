@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
         fontFamily: 'Nunito',
         fontWeight: '600',
         fontSize: '25px',
-        color: '#202960'
+        color: 'white'
     },
     content:{
         fontFamily: 'Nunito',
@@ -59,7 +59,7 @@ function Conference({match}){
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        
+
     }, [])
 
     return (
@@ -91,11 +91,11 @@ function Conference({match}){
                 </ActionHolder>
             </Holder>
             <Utils></Utils>
-            <Dialog open={open} fullWidth TransitionComponent={Transition} onClose={() => setOpen(false)}>
-                <DialogTitle>
+            <Dialog open={open} fullWidth TransitionComponent={Transition} onClose={() => setOpen(false)} >
+                <DialogTitle style={{backgroundColor: '#3E5771', color: 'white'}}>
                     <span className={classes.heading}>Meeting Information</span>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent style={{backgroundColor: '#3E5771', color: 'white'}}>
                     <p className={classes.content}>
                         Please share the meeting link displayed below or the meeting id to allow other participants to join the meeting.
                     </p>
