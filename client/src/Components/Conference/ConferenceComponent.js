@@ -5,7 +5,7 @@ export const Container = styled.div`
     width: 100%;
     height: 100vh;
     grid-template-columns: 8fr 2fr;
-    background-color: #202960;
+    background-color: #2C3E50;
 `
 
 export const Holder = styled.div`
@@ -17,7 +17,7 @@ export const Holder = styled.div`
 
 export const Utils = styled.div`
     height: 100%;
-    background-color: #2D2B8D;
+    background-color: #3E5771;
     border-radius: 15px;
 `
 export const VideoContainer = styled.div`
@@ -31,7 +31,7 @@ export const ActionHolder = styled.div`
 `
 
 export const Actions = styled.div`
-    background-color: #2D2B8D;
+    background-color: #3E5771;
     width: 50%;
     height: 10vh;
     border-radius: 15px;
