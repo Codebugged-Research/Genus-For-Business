@@ -21,7 +21,6 @@ import { MdTv, MdCallEnd } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
 
 const io = require('socket.io-client');
-const socket = io('http://localhost:3001/');
 const wrtc = require('wrtc');
 
 const useStyles = makeStyles((theme) => ({
@@ -70,7 +69,7 @@ function Conference({match}){
     const socketRef = useRef();
     const ownVideo = useRef();
     const peersRef = useRef([]);
-    const meetId = match.params.meetId;
+    const meetID = match.params.meetId;
 
     const [open, setOpen] = useState(false);
     const [openSnack, setOpenSnack] = useState(false);
@@ -165,7 +164,7 @@ function Conference({match}){
             video: true
         }).then((stream) => {
             ownVideo.current.srcObject = stream;
-            socketRef.current.emit("getAllUsers");
+            socketRef.current.emit("getAllUsers", meetID);
             socketRef.current.on("allUsers", users => {
                 const peers = [];
                 users.forEach(userID => {
@@ -195,16 +194,32 @@ function Conference({match}){
             })
         })
         .catch((err) => {
+            console.log("Err",err);
             handleError("streamError");
         })
     }
 
+    const PeerVideo = (props) => {
+        const ref = useRef();
+
+        useEffect(() => {
+            props.peer.on("stream", stream => {
+                ref.current.srcObject = stream;
+            })
+        }, []);
+
+        return (
+            <OwnVideo playsInline autoPlay ref={ref} />
+        )
+    }
+
     useEffect(() => {
+        socketRef.current = io("http://localhost:3001/");
         const data = {
             username: userName,
             meetId: match.params.meetId
         }
-        socket.emit('joinViaLink', data, handleConnectResponse);
+        socketRef.current.emit('joinViaLink', data, handleConnectResponse);
     }, [match.params.meetId, userName])
 
     return (
@@ -212,6 +227,9 @@ function Conference({match}){
             <Holder>
                 <VideoContainer id="videoContainer">
                     <OwnVideo muted ref={ownVideo} autoPlay playsInline />
+                    {peers.map((peer, index) => {
+                        return <PeerVideo key={index} peer={peer} />
+                    })}
                 </VideoContainer>
                 <ActionHolder>
                     <Actions>
