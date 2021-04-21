@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import Peer from 'simple-peer';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -21,6 +21,7 @@ import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } f
 
 const io = require('socket.io-client');
 const socket = io('http://localhost:3001/');
+const wrtc = require('wrtc');
 
 const useStyles = makeStyles((theme) => ({
     iconHolder: {
@@ -63,6 +64,12 @@ function Conference({match}){
 
     const [videoStatus, setVideoStatus] = useState(true);
     const [audioStatus, setAudioStatus] = useState(true);
+
+    const [peers, setPeers] = useState([]);
+    const socketRef = useRef();
+    const ownVideo = useRef();
+    const peersRef = useRef([]);
+    const meetId = match.params.meetId;
 
     const [open, setOpen] = useState(false);
     const [openSnack, setOpenSnack] = useState(false);
@@ -121,13 +128,61 @@ function Conference({match}){
         }
     }
 
+    const createPeer = (userToSignal, callerID, stream) => {
+        const peer = new Peer({
+            initiator: true,
+            trickle: false,
+            wrtc: wrtc,
+            stream
+        })
+
+        peer.on("signal", signal => {
+            socketRef.current.emit("sendingSignal", (userToSignal, callerID, signal))
+        })
+    }
+
+    const addPeer = (incomingSignal, callerID, stream) => {
+        const peer = new Peer({
+            initiator: false,
+            trickle: false,
+            wrtc: wrtc,
+            stream
+        })
+
+        peer.on("signal", signal => {
+            socketRef.current.emit("returningSignal", {signal, callerID})
+        })
+    }
 
     const generateStream = () => {
         navigator.mediaDevices.getUserMedia({
             audio: true,
             video: true
         }).then((stream) => {
-            
+            ownVideo.current.srcObject = stream;
+            socketRef.current.emit("getAllUsers");
+            socketRef.current.on("allUsers", users => {
+                const peers = [];
+                users.forEach(userID => {
+                    const peer = createPeer(userID, socketRef.current.id, stream);
+                    peersRef.current.push({
+                        peerID: userID,
+                        peer
+                    })
+                    peers.push(peer);
+                    setPeers(peers);
+                })
+            })
+
+            socketRef.current.on("userJoined", payload => {
+                const peer = addPeer(payload.signal, payload.callerID, stream);
+                peersRef.current.push({
+                    peerID: payload.callerID,
+                    peer
+                })
+
+                setPeers(users => [...users, peer]);
+            })
         })
         .catch((err) => {
             handleError("streamError");
@@ -146,7 +201,7 @@ function Conference({match}){
         <Container>
             <Holder>
                 <VideoContainer id="videoContainer">
-                    
+
                 </VideoContainer>
                 <ActionHolder>
                     <Actions>

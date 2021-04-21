@@ -22,6 +22,9 @@ export const Utils = styled.div`
     border-bottom-right-radius: 17px;
 `
 export const VideoContainer = styled.div`
+    display: grid;
+    place-items: center;
+    padding: 5px 5px 0px 5px;
 `
 
 export const ActionHolder = styled.div`
