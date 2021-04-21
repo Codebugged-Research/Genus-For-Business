@@ -14,7 +14,8 @@ import {
     Utils,
     VideoContainer,
     ActionHolder,
-    Actions
+    Actions,
+    OwnVideo
 } from './ConferenceComponent';
 import { MdTv, MdCallEnd } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
@@ -139,6 +140,8 @@ function Conference({match}){
         peer.on("signal", signal => {
             socketRef.current.emit("sendingSignal", (userToSignal, callerID, signal))
         })
+
+        return peer;
     }
 
     const addPeer = (incomingSignal, callerID, stream) => {
@@ -152,6 +155,8 @@ function Conference({match}){
         peer.on("signal", signal => {
             socketRef.current.emit("returningSignal", {signal, callerID})
         })
+
+        peer.signal(incomingSignal);
     }
 
     const generateStream = () => {
@@ -183,6 +188,11 @@ function Conference({match}){
 
                 setPeers(users => [...users, peer]);
             })
+
+            socketRef.current.on("receivingReturnSignal", payload => {
+                const item = peersRef.current.find(p => p.peerID === payload.id);
+                item.peer.signal(payload.signal);
+            })
         })
         .catch((err) => {
             handleError("streamError");
@@ -201,7 +211,7 @@ function Conference({match}){
         <Container>
             <Holder>
                 <VideoContainer id="videoContainer">
-
+                    <OwnVideo muted ref={ownVideo} autoPlay playsInline />
                 </VideoContainer>
                 <ActionHolder>
                     <Actions>
