@@ -18,7 +18,8 @@ export const Holder = styled.div`
 export const Utils = styled.div`
     height: 100%;
     background-color: #3E5771;
-    border-radius: 15px;
+    border-top-right-radius: 17px;
+    border-bottom-right-radius: 17px;
 `
 export const VideoContainer = styled.div`
 `
