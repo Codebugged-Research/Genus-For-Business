@@ -56,13 +56,13 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function Conference({match, history}){
+function Conference({match}){
 
     const classes = useStyles();
     const userName = sessionStorage.getItem('userName');
 
-    const [videoStatus, setVideoStatus] = useState(false);
-    const [audioStatus, setAudioStatus] = useState(false);
+    const [videoStatus, setVideoStatus] = useState(true);
+    const [audioStatus, setAudioStatus] = useState(true);
 
     const [open, setOpen] = useState(false);
     const [openSnack, setOpenSnack] = useState(false);
@@ -100,6 +100,28 @@ function Conference({match, history}){
         }
     }
 
+    const handleClick = (type) => {
+        switch (type) {
+            case "cam":
+                if(videoStatus){
+                    setVideoStatus(false);
+                } else {
+                    setVideoStatus(true);
+                }
+                break;
+            case "mic":
+                if(audioStatus){
+                    setAudioStatus(false);
+                } else {
+                    setAudioStatus(true);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+
     const generateStream = () => {
         navigator.mediaDevices.getUserMedia({
             audio: true,
@@ -118,13 +140,13 @@ function Conference({match, history}){
             meetId: match.params.meetId
         }
         socket.emit('joinViaLink', data, handleConnectResponse);
-    }, [handleConnectResponse, match.params.meetId, userName])
+    }, [match.params.meetId, userName])
 
     return (
         <Container>
             <Holder>
                 <VideoContainer id="videoContainer">
-
+                    
                 </VideoContainer>
                 <ActionHolder>
                     <Actions>
@@ -132,12 +154,28 @@ function Conference({match, history}){
                             <BiErrorCircle className={classes.iconStyle} onClick = {() => setOpen(true)} />
                         </div>
                         <div className={classes.iconHolder}>
-                            <BiCamera className={classes.iconStyle} />
-                            <BiCameraOff className={classes.iconStyle} style={{display: 'none'}} />
+                            <BiCamera 
+                                className={classes.iconStyle} 
+                                style={{display: videoStatus === false ? 'none' : 'flex'}}
+                                onClick={() => handleClick("cam")}
+                            />
+                            <BiCameraOff 
+                                className={classes.iconStyle} 
+                                style={{display: videoStatus === false ? 'flex' : 'none'}} 
+                                onClick={() => handleClick("cam")}
+                            />
                         </div>
                         <div className={classes.iconHolder}>
-                            <BiMicrophone className={classes.iconStyle} />
-                            <BiMicrophoneOff className={classes.iconStyle} style={{display: 'none'}} />
+                            <BiMicrophone 
+                                className={classes.iconStyle} 
+                                style={{display: audioStatus === false ? 'none' : 'flex'}}
+                                onClick={() => handleClick("mic")}
+                            />
+                            <BiMicrophoneOff 
+                                className={classes.iconStyle} 
+                                style={{display: audioStatus === false ? 'flex': 'none'}} 
+                                onClick={() => handleClick("mic")}
+                            />
                         </div>
                         <div className={classes.iconHolder}>
                             <MdTv className={classes.iconStyle} />
