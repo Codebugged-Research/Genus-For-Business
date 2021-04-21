@@ -3,7 +3,7 @@ export const setSessionStorage = (key, value) => {
 }
 
 export const isNamed = () => {
-    if(sessionStorage.getItem('status')){
+    if(sessionStorage.getItem('userName')){
         return true
     } else {
         return false

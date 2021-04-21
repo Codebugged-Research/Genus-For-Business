@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import Peer from 'simple-peer';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -17,7 +18,9 @@ import {
 } from './ConferenceComponent';
 import { MdTv, MdCallEnd } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
-import Peer from 'simple-peer';
+
+const io = require('socket.io-client');
+const socket = io('http://localhost:3001/');
 
 const useStyles = makeStyles((theme) => ({
     iconHolder: {
@@ -53,9 +56,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function Conference({match}){
+function Conference({match, history}){
 
     const classes = useStyles();
+    const userName = sessionStorage.getItem('userName');
 
     const [videoStatus, setVideoStatus] = useState(false);
     const [audioStatus, setAudioStatus] = useState(false);
@@ -77,12 +81,26 @@ function Conference({match}){
                     error: "There was an error while accessing your stream"
                 })
                 break;
+            case "wrong":
+                setErrorMessage({
+                    title: "Meeting Code Invalid",
+                    error: "A meeting with the mentioned code was not found!"
+                })
+                break;
             default:
                 break;
         }
     } 
 
-    useEffect(() => {
+    const handleConnectResponse = (status) => {
+        if(status === "connected"){
+            generateStream();
+        } else {
+            handleError("wrong");
+        }
+    }
+
+    const generateStream = () => {
         navigator.mediaDevices.getUserMedia({
             audio: true,
             video: true
@@ -92,7 +110,15 @@ function Conference({match}){
         .catch((err) => {
             handleError("streamError");
         })
-    }, [])
+    }
+
+    useEffect(() => {
+        const data = {
+            username: userName,
+            meetId: match.params.meetId
+        }
+        socket.emit('joinViaLink', data, handleConnectResponse);
+    }, [handleConnectResponse, match.params.meetId, userName])
 
     return (
         <Container>

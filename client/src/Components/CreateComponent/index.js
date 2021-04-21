@@ -68,7 +68,8 @@ function CreateScreen({history}){
     }
 
     const createdMeeting = (meetId) => {
-        setSessionStorage('status', true);
+        setSessionStorage('userName', name);
+
         history.push(`/meet/${meetId}`)
     }
     const joinedMeeting = () => {
@@ -88,7 +89,9 @@ function CreateScreen({history}){
     }
     const handleJoinResponse = (status) => {
         if(status === "joined"){
-            setSessionStorage('status', true)
+            setSessionStorage('userName', username);
+
+
             joinedMeeting();
         } else {
             wrongMeeting();

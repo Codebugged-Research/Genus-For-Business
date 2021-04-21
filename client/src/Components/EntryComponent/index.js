@@ -63,6 +63,7 @@ function JoinScreen({match, history}){
                     title: "Wrong Meeting Code",
                     error: "A meeting with this code does not exist!"
                 })
+                break;
             default:
                 break;
         }
@@ -75,7 +76,7 @@ function JoinScreen({match, history}){
 
     const handleJoinLink = (status) => {
         if(status === "joined"){
-            setSessionStorage('status', true);
+            setSessionStorage('userName', username);
             history.push(`/meet/${match.params.meetId}`)
         } else {
             handleErrorType("WrongMeetingCode")
