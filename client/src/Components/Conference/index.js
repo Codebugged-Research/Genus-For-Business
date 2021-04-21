@@ -17,6 +17,7 @@ import {
 } from './ConferenceComponent';
 import { MdTv, MdCallEnd } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
+import Peer from 'simple-peer';
 
 const useStyles = makeStyles((theme) => ({
     iconHolder: {
@@ -86,7 +87,7 @@ function Conference({match}){
             audio: true,
             video: true
         }).then((stream) => {
-
+            
         })
         .catch((err) => {
             handleError("streamError");
@@ -131,7 +132,7 @@ function Conference({match}){
                         Please share the meeting link displayed below or the meeting id to allow other participants to join the meeting.
                     </p>
                     <p className={classes.linkId}>
-                        {"Meeting Link - "}{window.location.href}
+                        {"Meeting Link - "}{`${window.location.origin}/join/${match.params.meetId}`}
                     </p>
                     <p className={classes.linkId}>
                         {"Meeting Id - "}{match.params.meetId}

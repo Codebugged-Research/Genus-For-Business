@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -11,7 +11,6 @@ import {
     Container,
     Section
 } from './JoinComponents';
-import { setLocalStorage } from '../../helpers/auth.helpers';
 
 const io = require('socket.io-client');
 const socket = io('http://localhost:3001');
@@ -44,6 +43,30 @@ function JoinScreen({match, history}){
 
     const [username, setUsername] = useState("");
     const [open, setOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState({
+        title: "",
+        error: ""
+    })
+
+    const handleErrorType = (type) => {
+        setOpen(true);
+        switch (type) {
+            case "streamAccessError":
+                setErrorMessage({
+                    title: "Stream Access Error",
+                    error: "Error ocurred while accessing your media devices!"
+                })
+                break;
+            case "WrongMeetingCode":
+                setErrorMessage({
+                    title: "Wrong Meeting Code",
+                    error: "A meeting with this code does not exist!"
+                })
+            default:
+                break;
+        }
+    }
+
     const handleClose = () => {
         setUsername("");
         setOpen(false);
@@ -51,10 +74,9 @@ function JoinScreen({match, history}){
 
     const handleJoinLink = (status) => {
         if(status === "joined"){
-            setLocalStorage(username);
-            history.push(`meet/${match.meetId}`)
+            history.push(`/meet/${match.params.meetId}`)
         } else {
-            setOpen(true);
+            handleErrorType("WrongMeetingCode")
         }
     }
 
@@ -62,11 +84,24 @@ function JoinScreen({match, history}){
         e.preventDefault();
         const data = {
             name: username,
-            meetId: match.meetId
+            meetId: match.params.meetId
         }
 
         socket.emit('joinMeet', data, handleJoinLink);
     }
+
+    useEffect(() => {
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        })
+        .then((stream) => {
+
+        })
+        .catch((err) => {
+            handleErrorType("streamAccessError");
+        })
+    },[])
 
     return(
         <Container>
@@ -99,8 +134,8 @@ function JoinScreen({match, history}){
                     setOpen(false)
                     setUsername("")
                 }}>
-                    <AlertTitle>Wrong Meeting Code</AlertTitle>
-                    A meeting with this code does not exist!
+                    <AlertTitle>{errorMessage.title}</AlertTitle>
+                    {errorMessage.error}
                 </Alert>
             </Snackbar>
         </Container>
