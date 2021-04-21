@@ -10,7 +10,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import {
     Container
 } from './CreateComponent';
-import { setLocalStorage } from '../../helpers/auth.helpers';
+import { setSessionStorage } from '../../helpers/auth.helpers';
 
 const useStyles = makeStyles((theme) => ({
     paperStyle: {
@@ -68,7 +68,7 @@ function CreateScreen({history}){
     }
 
     const createdMeeting = (meetId) => {
-        setLocalStorage(name);
+        setSessionStorage('status', true);
         history.push(`/meet/${meetId}`)
     }
     const joinedMeeting = () => {
@@ -88,7 +88,7 @@ function CreateScreen({history}){
     }
     const handleJoinResponse = (status) => {
         if(status === "joined"){
-            setLocalStorage(username);
+            setSessionStorage('status', true)
             joinedMeeting();
         } else {
             wrongMeeting();

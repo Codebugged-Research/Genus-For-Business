@@ -11,6 +11,7 @@ import {
     Container,
     Section
 } from './JoinComponents';
+import { setSessionStorage } from '../../helpers/auth.helpers';
 
 const io = require('socket.io-client');
 const socket = io('http://localhost:3001');
@@ -74,6 +75,7 @@ function JoinScreen({match, history}){
 
     const handleJoinLink = (status) => {
         if(status === "joined"){
+            setSessionStorage('status', true);
             history.push(`/meet/${match.params.meetId}`)
         } else {
             handleErrorType("WrongMeetingCode")

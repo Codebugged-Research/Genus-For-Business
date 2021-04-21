@@ -1,12 +1,9 @@
-export const setLocalStorage = (value) => {
-    if(localStorage.getItem('name')){
-        localStorage.removeItem('name')
-    }
-    localStorage.setItem('name', value);
+export const setSessionStorage = (key, value) => {
+    sessionStorage.setItem(key, value);
 }
 
 export const isNamed = () => {
-    if(localStorage.getItem('name')){
+    if(sessionStorage.getItem('status')){
         return true
     } else {
         return false
