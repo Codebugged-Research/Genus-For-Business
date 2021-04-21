@@ -10,20 +10,31 @@ export const Container = styled.div`
 
 export const Holder = styled.div`
     display: grid;
-    grid-template-rows: 8fr 2fr;
+    grid-template-rows: 8.5fr 1.5fr;
     grid-gap: 15px;
     height: 100%;
 `
 
 export const Utils = styled.div`
     height: 100%;
-    background-color: #2D2B6C;
+    background-color: #2D2B8D;
     border-radius: 15px;
 `
 export const VideoContainer = styled.div`
 `
 
-export const Actions = styled.div`
+export const ActionHolder = styled.div`
     width: 100%;
-    background-color: #2B2E74;
+    display: grid;
+    place-items: center;
+    height: 100%;
+`
+
+export const Actions = styled.div`
+    background-color: #2D2B8D;
+    width: 50%;
+    height: 10vh;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 `
