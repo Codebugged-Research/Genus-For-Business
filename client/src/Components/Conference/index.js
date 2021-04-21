@@ -4,6 +4,9 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import Slide from '@material-ui/core/Slide';
+import Alert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
+import AlertTitle from '@material-ui/lab/AlertTitle';
 import {
     Container,
     Holder,
@@ -57,9 +60,37 @@ function Conference({match}){
     const [audioStatus, setAudioStatus] = useState(false);
 
     const [open, setOpen] = useState(false);
+    const [openSnack, setOpenSnack] = useState(false);
+
+    const [errorMessage, setErrorMessage] = useState({
+        title: "",
+        error: ""
+    })
+    
+    const handleError = (status) => {
+        setOpenSnack(true);
+        switch (status) {
+            case "streamError":
+                setErrorMessage({
+                    title: "Stream Fetch Error",
+                    error: "There was an error while accessing your stream"
+                })
+                break;
+            default:
+                break;
+        }
+    } 
 
     useEffect(() => {
+        navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+        }).then((stream) => {
 
+        })
+        .catch((err) => {
+            handleError("streamError");
+        })
     }, [])
 
     return (
@@ -107,6 +138,23 @@ function Conference({match}){
                     </p>
                 </DialogContent>
             </Dialog>
+            <Snackbar 
+                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                open={openSnack} 
+                autoHideDuration={3000} 
+                onClose={() => {
+                    setOpenSnack(false)
+                    setErrorMessage({
+                        title:"",
+                        error: ""
+                    })
+                }}
+            >
+                <Alert severity="info" variant="filled">
+                    <AlertTitle>{errorMessage.title}</AlertTitle>
+                    {errorMessage.error}
+                </Alert>
+            </Snackbar>
         </Container>
     )
 }
