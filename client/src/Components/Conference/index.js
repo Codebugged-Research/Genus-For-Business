@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Peer from 'simple-peer';
 import { makeStyles } from '@material-ui/core/styles';
-import Slide from '@material-ui/core/Slide';
 import {
     Container,
     Holder,
@@ -50,10 +49,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
-
 function Conference({match, history}){
 
     const classes = useStyles();
@@ -101,34 +96,37 @@ function Conference({match, history}){
     const handleShareScreen = () => { 
         const shareBtn = document.getElementById("shareBtn");
 
-        navigator.mediaDevices.getUserMedia({cursor: true})
-        .then((sharedScreen) => {
+        if(!screenShareIndicator){
+            navigator.mediaDevices.getDisplayMedia({cursor: true})
+            .then((sharedScreen) => {
 
-            screenShareIndicator = true;
-            sharedStream = sharedScreen;
-            shareBtn.disabled = true;
+                screenShareIndicator = true;
+                sharedStream = sharedScreen;
+                shareBtn.disabled = true;
 
-            if(peers.length !== 0){
-                peers.forEach((peerElem) => {
-                    peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
-                })
-            }
+                if(peers.length !== 0){
+                    peers.forEach((peerElem) => {
+                        peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
+                    })
+                }
 
-            sharedScreen.getTracks()[0].onended = () => {
-                screenShareIndicator = false;
-                shareBtn.disabled = false;
-            }
-        })
-        .catch((err) => {
-            if(!toast.isActive(toast_id)){
-                toast({
-                    title: "Screen Share Error",
-                    description: "An error ocurred while trying to share your screen!",
-                    duration: 3000,
-                    position: "top-right"
-                })
-            }
-        })
+                sharedScreen.getTracks()[0].onended = () => {
+                    screenShareIndicator = false;
+                    shareBtn.disabled = false;
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                if(!toast.isActive(toast_id)){
+                    toast({
+                        title: "Screen Share Error",
+                        description: "An error ocurred while trying to share your screen!",
+                        duration: 3000,
+                        position: "top-right"
+                    })
+                }
+            })
+        }
     }
 
     const handleConnectLink = () => {
@@ -191,7 +189,6 @@ function Conference({match, history}){
         const ref = useRef();
 
         useEffect(() => {
-            console.log(props);
             props.peer[0].on("stream", stream => {
                 ref.current.srcObject = stream;
             })
@@ -313,7 +310,7 @@ function Conference({match, history}){
                             />
                         </div>
                         <div className={classes.iconHolder}>
-                            <MdTv className={classes.iconStyle} onClick={handleShareScreen} />
+                            <MdTv className={classes.iconStyle} onClick={handleShareScreen} id="shareBtn" />
                         </div>
                         <div className={classes.iconHolder}>
                             <MdCallEnd className={classes.iconStyle} />
