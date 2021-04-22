@@ -1,13 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Peer from 'simple-peer';
 import { makeStyles } from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
 import Slide from '@material-ui/core/Slide';
-import Alert from '@material-ui/lab/Alert';
-import Snackbar from '@material-ui/core/Snackbar';
-import AlertTitle from '@material-ui/lab/AlertTitle';
 import {
     Container,
     Holder,
@@ -21,6 +15,7 @@ import {
 } from './ConferenceComponent';
 import { MdTv, MdCallEnd } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
+import { useToast } from '@chakra-ui/react';
 
 const io = require('socket.io-client');
 const wrtc = require('wrtc');
@@ -63,7 +58,9 @@ function Conference({match, history}){
 
     const classes = useStyles();
     const userName = sessionStorage.getItem('userName');
-
+    const toast = useToast();
+    const toast_id = "toast-id";
+ 
     var screenShareIndicator = false;
     var sharedStream;
 
@@ -72,39 +69,6 @@ function Conference({match, history}){
     const ownVideo = useRef();
     const peersRef = useRef([]);
     const meetID = match.params.meetId;
-
-    const [open, setOpen] = useState(false);
-    const [openSnack, setOpenSnack] = useState(false);
-
-    const [errorMessage, setErrorMessage] = useState({
-        title: "",
-        error: ""
-    })
-    
-    const handleError = (status) => {
-        setOpenSnack(true);
-        switch (status) {
-            case "streamError":
-                setErrorMessage({
-                    title: "Stream Fetch Error",
-                    error: "There was an error while accessing your stream"
-                })
-                break;
-            case "wrong":
-                setErrorMessage({
-                    title: "Meeting Code Invalid",
-                    error: "A meeting with the mentioned code was not found!"
-                })
-                break;
-            case "screenShareError": 
-                setErrorMessage({
-                    title: "Screen Share Error",
-                    error: "An error ocurred while trying to share your screen!"
-                })
-            default:
-                break;
-        }
-    } 
 
     const toggleVideoTracks = () => {
         if(ownVideo.current.srcObject.getVideoTracks()[0].enabled){
@@ -156,8 +120,26 @@ function Conference({match, history}){
             }
         })
         .catch((err) => {
-            handleError("screenShareError")
+            if(!toast.isActive(toast_id)){
+                toast({
+                    title: "Screen Share Error",
+                    description: "An error ocurred while trying to share your screen!",
+                    duration: 3000,
+                    position: "top-right"
+                })
+            }
         })
+    }
+
+    const handleConnectLink = () => {
+        if(!toast.isActive(toast_id)){
+            toast({
+                title: "Share Meeting Link",
+                description: `http://localhost:3000/join/${match.params.meetId}`,
+                duration: 3000,
+                position: "top-right"
+            })
+        }
     }
 
     const handleClick = (type) => {
@@ -264,7 +246,14 @@ function Conference({match, history}){
                 })
             })
             .catch((err) => {
-                handleError("streamError");
+                if(!toast.isActive(toast_id)){
+                    toast({
+                        title: "Stream Fetch Error",
+                        description: "An error ocurred while trying to fetch your stream",
+                        duration: 3000,
+                        position: "top-right"
+                    })
+                }
             })
         }
 
@@ -295,7 +284,7 @@ function Conference({match, history}){
                 <ActionHolder>
                     <Actions>
                         <div className={classes.iconHolder}>
-                            <BiErrorCircle className={classes.iconStyle} onClick = {() => setOpen(true)} />
+                            <BiErrorCircle className={classes.iconStyle} onClick = {handleConnectLink} />
                         </div>
                         <div className={classes.iconHolder}>
                             <BiCamera 
@@ -306,7 +295,7 @@ function Conference({match, history}){
                             <BiCameraOff 
                                 className={classes.iconStyle} 
                                 id="videoOff"
-                                display="none"
+                                style={{display: "none"}}
                                 onClick={() => handleClick("cam")}
                             />
                         </div>
@@ -318,7 +307,7 @@ function Conference({match, history}){
                             />
                             <BiMicrophoneOff 
                                 className={classes.iconStyle} 
-                                display="none" 
+                                style={{display: "none"}} 
                                 id="audioOff"
                                 onClick={() => handleClick("mic")}
                             />
@@ -333,39 +322,6 @@ function Conference({match, history}){
                 </ActionHolder>
             </Holder>
             <Utils></Utils>
-            <Dialog open={open} fullWidth TransitionComponent={Transition} onClose={() => setOpen(false)} >
-                <DialogTitle style={{backgroundColor: '#3E5771', color: 'white'}}>
-                    <span className={classes.heading}>Meeting Information</span>
-                </DialogTitle>
-                <DialogContent style={{backgroundColor: '#3E5771', color: 'white'}}>
-                    <p className={classes.content}>
-                        Please share the meeting link displayed below or the meeting id to allow other participants to join the meeting.
-                    </p>
-                    <p className={classes.linkId}>
-                        {"Meeting Link - "}{`${window.location.origin}/join/${match.params.meetId}`}
-                    </p>
-                    <p className={classes.linkId}>
-                        {"Meeting Id - "}{match.params.meetId}
-                    </p>
-                </DialogContent>
-            </Dialog>
-            <Snackbar 
-                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
-                open={openSnack} 
-                autoHideDuration={3000} 
-                onClose={() => {
-                    setOpenSnack(false)
-                    setErrorMessage({
-                        title:"",
-                        error: ""
-                    })
-                }}
-            >
-                <Alert severity="info" variant="filled">
-                    <AlertTitle>{errorMessage.title}</AlertTitle>
-                    {errorMessage.error}
-                </Alert>
-            </Snackbar>
         </Container>
     )
 }
