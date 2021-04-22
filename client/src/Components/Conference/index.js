@@ -64,8 +64,8 @@ function Conference({match, history}){
     const classes = useStyles();
     const userName = sessionStorage.getItem('userName');
 
-    const [videoStatus, setVideoStatus] = useState(true);
-    const [audioStatus, setAudioStatus] = useState(true);
+    var screenShareIndicator = false;
+    var sharedStream;
 
     const [peers, setPeers] = useState([]);
     const socketRef = useRef();
@@ -96,6 +96,11 @@ function Conference({match, history}){
                     error: "A meeting with the mentioned code was not found!"
                 })
                 break;
+            case "screenShareError": 
+                setErrorMessage({
+                    title: "Screen Share Error",
+                    error: "An error ocurred while trying to share your screen!"
+                })
             default:
                 break;
         }
@@ -127,6 +132,32 @@ function Conference({match, history}){
             document.getElementById("audioOff").style.display = "none";
             document.getElementById("audioOn").style.display = "flex";
         }
+    }
+
+    const handleShareScreen = () => { 
+        const shareBtn = document.getElementById("shareBtn");
+
+        navigator.mediaDevices.getUserMedia({cursor: true})
+        .then((sharedScreen) => {
+
+            screenShareIndicator = true;
+            sharedStream = sharedScreen;
+            shareBtn.disabled = true;
+
+            if(peers.length !== 0){
+                peers.forEach((peerElem) => {
+                    peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
+                })
+            }
+
+            sharedScreen.getTracks()[0].onended = () => {
+                screenShareIndicator = false;
+                shareBtn.disabled = false;
+            }
+        })
+        .catch((err) => {
+            handleError("screenShareError")
+        })
     }
 
     const handleClick = (type) => {
@@ -282,17 +313,18 @@ function Conference({match, history}){
                         <div className={classes.iconHolder}>
                             <BiMicrophone 
                                 className={classes.iconStyle} 
-                                style={{display: audioStatus === false ? 'none' : 'flex'}}
+                                id="audioOn"
                                 onClick={() => handleClick("mic")}
                             />
                             <BiMicrophoneOff 
                                 className={classes.iconStyle} 
-                                style={{display: audioStatus === false ? 'flex': 'none'}} 
+                                display="none" 
+                                id="audioOff"
                                 onClick={() => handleClick("mic")}
                             />
                         </div>
                         <div className={classes.iconHolder}>
-                            <MdTv className={classes.iconStyle} />
+                            <MdTv className={classes.iconStyle} onClick={handleShareScreen} />
                         </div>
                         <div className={classes.iconHolder}>
                             <MdCallEnd className={classes.iconStyle} />
