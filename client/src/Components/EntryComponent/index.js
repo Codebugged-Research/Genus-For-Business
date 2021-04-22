@@ -44,6 +44,7 @@ function JoinScreen({match, history}){
 
     const [username, setUsername] = useState("");
     const [open, setOpen] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState({
         title: "",
         error: ""
@@ -74,37 +75,25 @@ function JoinScreen({match, history}){
         setOpen(false);
     }
 
-    const handleJoinLink = (status) => {
-        if(status === "joined"){
-            setSessionStorage('userName', username);
-            history.push(`/meet/${match.params.meetId}`)
+    const handleJoinWithLink = (e) => {
+        e.preventDefault();
+
+        setSessionStorage('userName', username);
+        history.push(`/meet/${match.params.meetId}`)
+    }
+
+    const handleCheckResponse = (status) => {
+        if(status === "exists"){
+            setDisabled(false);
         } else {
+            setDisabled(true);
             handleErrorType("WrongMeetingCode")
         }
     }
 
-    const handleJoinWithLink = (e) => {
-        e.preventDefault();
-        const data = {
-            name: username,
-            meetId: match.params.meetId
-        }
-
-        socket.emit('joinMeet', data, handleJoinLink);
-    }
-
     useEffect(() => {
-        navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true
-        })
-        .then((stream) => {
-
-        })
-        .catch((err) => {
-            handleErrorType("streamAccessError");
-        })
-    },[])
+        socket.emit("checkMeetExists", match.params.meetId, handleCheckResponse);
+    },[match.params.meetId])
 
     return(
         <Container>
@@ -126,6 +115,7 @@ function JoinScreen({match, history}){
                             type="submit"
                             variant="contained"
                             style={{backgroundColor: '#202950'}}
+                            disabled={disabled}
                         >
                             Join Meeting
                         </Button>

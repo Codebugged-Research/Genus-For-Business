@@ -57,7 +57,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function Conference({match}){
+function Conference({match, history}){
 
     const classes = useStyles();
     const userName = sessionStorage.getItem('userName');
@@ -168,7 +168,7 @@ function Conference({match}){
             socketRef.current.on("allUsers", users => {
                 const peers = [];
                 users.forEach(userID => {
-                    const peer = createPeer(userID, socketRef.current.id, stream);
+                    const peer = createPeer(userID[0], socketRef.current.id, stream);
                     peersRef.current.push({
                         peerID: userID,
                         peer
@@ -194,7 +194,6 @@ function Conference({match}){
             })
         })
         .catch((err) => {
-            console.log("Err",err);
             handleError("streamError");
         })
     }
@@ -214,13 +213,17 @@ function Conference({match}){
     }
 
     useEffect(() => {
-        socketRef.current = io("http://localhost:3001/");
-        const data = {
-            username: userName,
-            meetId: match.params.meetId
+        socketRef.current = io();
+        if(userName){
+            const data = {
+                username: userName,
+                meetId: match.params.meetId
+            }
+            socketRef.current.emit('joinViaLink', data, handleConnectResponse);
+        } else {
+            history.push(`/join/${match.params.meetId}`);
         }
-        socketRef.current.emit('joinViaLink', data, handleConnectResponse);
-    }, [match.params.meetId, userName])
+    }, [match.params.meetId, userName]);
 
     return (
         <Container>

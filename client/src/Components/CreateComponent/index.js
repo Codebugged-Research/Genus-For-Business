@@ -60,6 +60,11 @@ function CreateScreen({history}){
     const [username, setUsername] = useState("");
     const [open, setOpen] = useState(false);
 
+    function generateMeetId(){
+        const meetId = (new Date().getTime() * 5) % 100000000000;
+        return meetId;
+    }
+
     const handleFormState = (set) => {
         setFormState(set);
         setName("");
@@ -67,11 +72,6 @@ function CreateScreen({history}){
         setUsername("");
     }
 
-    const createdMeeting = (meetId) => {
-        setSessionStorage('userName', name);
-
-        history.push(`/meet/${meetId}`)
-    }
     const joinedMeeting = () => {
         history.push(`/meet/${code}`);
     }
@@ -84,14 +84,14 @@ function CreateScreen({history}){
 
     const handleCreate = (e) => {
         e.preventDefault();
+        setSessionStorage('userName', name);
 
-        socket.emit('createMeet', name, createdMeeting);
+        const meetId = generateMeetId();
+        history.push(`/meet/${meetId}`)
     }
-    const handleJoinResponse = (status) => {
-        if(status === "joined"){
+    const handleCheckResponse = (status) => {
+        if(status === "exists"){
             setSessionStorage('userName', username);
-
-
             joinedMeeting();
         } else {
             wrongMeeting();
@@ -100,12 +100,7 @@ function CreateScreen({history}){
 
     const handleJoin = (e) => {
         e.preventDefault();
-        const data = {
-            name: username,
-            meetId: code
-        }
-
-        socket.emit('joinMeet', data, handleJoinResponse);
+        socket.emit('checkMeetExists', code, handleCheckResponse);
     }
 
     return(
