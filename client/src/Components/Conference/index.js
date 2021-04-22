@@ -13,6 +13,7 @@ import {
     Holder,
     Utils,
     VideoContainer,
+    VideoHolder,
     ActionHolder,
     Actions,
     OwnVideo
@@ -155,7 +156,10 @@ function Conference({match, history}){
     const generateStream = () => {
         navigator.mediaDevices.getUserMedia({
             audio: true,
-            video: true
+            video: {
+                width: { ideal: 400},
+                height: {ideal: 400}
+            }
         }).then((stream) => {
             ownVideo.current.srcObject = stream;
             socketRef.current.emit("getAllUsers", meetID);
@@ -202,7 +206,9 @@ function Conference({match, history}){
         }, []);
 
         return (
-            <OwnVideo playsInline autoPlay ref={ref} />
+            <VideoHolder>
+                <OwnVideo playsInline autoPlay ref={ref} />
+            </VideoHolder>
         )
     }
 
@@ -223,7 +229,9 @@ function Conference({match, history}){
         <Container>
             <Holder>
                 <VideoContainer id="videoContainer">
-                    <OwnVideo muted ref={ownVideo} autoPlay playsInline />
+                    <VideoHolder>
+                        <OwnVideo muted ref={ownVideo} autoPlay playsInline />
+                    </VideoHolder>
                     {peers.map((peer, index) => {
                         return <PeerVideo key={index} peer={peer} />
                     })}

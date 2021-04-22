@@ -13,6 +13,7 @@ export const Holder = styled.div`
     grid-template-rows: 8.5fr 1.5fr;
     grid-gap: 15px;
     height: 100%;
+    width: 100%;
 `
 
 export const Utils = styled.div`
@@ -25,6 +26,16 @@ export const VideoContainer = styled.div`
     display: grid;
     place-items: center;
     padding: 5px 5px 0px 5px;
+    grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+    grid-template-rows: repeat(auto-fit, minmax(40%, 1fr));
+    grid-gap: 10px;
+    width: 100%;
+    height: 100%;
+`
+
+export const VideoHolder = styled.div`
+    display: grid;
+    place-items: center;
 `
 
 export const ActionHolder = styled.div`
@@ -46,4 +57,7 @@ export const Actions = styled.div`
 export const OwnVideo = styled.video`
     border-radius: 15px;
     overflow: hidden;
+    transform: scaleX(-1);
+    width: 100%;
+    height: 100%;
 `
