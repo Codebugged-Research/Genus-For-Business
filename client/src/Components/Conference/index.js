@@ -129,7 +129,7 @@ function Conference({match, history}){
         })
 
         peer.on("signal", signal => {
-            socketRef.current.emit("sendingSignal", (userToSignal, callerID, signal))
+            socketRef.current.emit("sendingSignal", userToSignal, callerID, signal)
         })
 
         return peer;
@@ -144,10 +144,12 @@ function Conference({match, history}){
         })
 
         peer.on("signal", signal => {
-            socketRef.current.emit("returningSignal", {signal, callerID})
+            socketRef.current.emit("returningSignal", signal, callerID)
         })
 
         peer.signal(incomingSignal);
+
+        return peer;
     }
 
     const generateStream = () => {
@@ -162,7 +164,7 @@ function Conference({match, history}){
                 users.forEach(userID => {
                     const peer = createPeer(userID[0], socketRef.current.id, stream);
                     peersRef.current.push({
-                        peerID: userID,
+                        peerID: userID[0],
                         peer
                     })
                     peers.push(peer);

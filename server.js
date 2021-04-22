@@ -30,7 +30,7 @@ io.on('connection', socket => {
             socket.join(data.meetId);
             meetingUsers[data.meetId].push([socket.id, data.name]);
 
-            io.to(data.meetId).emit("newJoinee", data.name);
+            // io.to(data.meetId).emit("newJoinee", data.name);
             generateStream();
         } else {
             meetingUsers[data.meetId] = [[socket.id, data.name]];
@@ -43,20 +43,18 @@ io.on('connection', socket => {
     socket.on("getAllUsers", (meetId) => {
         const usersHere = meetingUsers[meetId].filter(id => id[0] !== socket.id);
         socket.emit("allUsers", usersHere);
-
-        console.log(usersHere);
     })
 
-    socket.on("sendingSignal", payload => {
-        io.to(payload.userToSignal).emit('userJoined', {
-            signal: payload.signal,
-            callerID: payload.callerID
+    socket.on("sendingSignal", (userToSignal, callerID, signal) => {
+        io.to(userToSignal).emit('userJoined', {
+            signal: signal,
+            callerID: callerID
         })
     })
 
-    socket.on("returningSignal", payload => {
-        io.to(payload.callerID).emit("receivingReturnSignal", {
-            signal: payload.signal,
+    socket.on("returningSignal", (signal, callerID) => {
+        io.to(callerID).emit("receivingReturnSignal", {
+            signal: signal,
             id: socket.id
         })
     })
