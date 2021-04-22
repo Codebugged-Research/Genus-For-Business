@@ -24,43 +24,27 @@ io.on('connection', socket => {
         }
     })
 
-    socket.on('createMeet', (name, createdMeeting) => {
-        const meetId = generateMeetId();
-
-        if(!meetingUsers[meetId]){
-            meetingUsers[meetId] = [[socket.id, name]];
-            socket.join(meetId);
-
-            createdMeeting(meetId);   
-        } else {
-            createdMeeting(generateMeetId()); //second chance for generating a unique key
-        }
-    })
-
-    socket.on('joinMeet', (data, handleJoinResponse) => {
+    socket.on('joinMeet', (data, generateStream) => {
 
         if(meetingUsers[data.meetId]){
             socket.join(data.meetId);
             meetingUsers[data.meetId].push([socket.id, data.name]);
 
-            handleJoinResponse("joined");
             io.to(data.meetId).emit("newJoinee", data.name);
+            generateStream();
         } else {
-            handleJoinResponse("wrong");
-        }
-    })
+            meetingUsers[data.meetId] = [[socket.id, data.name]];
+            socket.join(data.meetId);
 
-    socket.on('joinViaLink', (data, handleConnectResponse) => {
-        if(meetingUsers[data.meetId] ){
-            handleConnectResponse("connected");
-        } else {
-            handleConnectResponse("wrong");
+            generateStream();
         }
     })
 
     socket.on("getAllUsers", (meetId) => {
         const usersHere = meetingUsers[meetId].filter(id => id[0] !== socket.id);
         socket.emit("allUsers", usersHere);
+
+        console.log(usersHere);
     })
 
     socket.on("sendingSignal", payload => {

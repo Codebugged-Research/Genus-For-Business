@@ -99,14 +99,6 @@ function Conference({match, history}){
         }
     } 
 
-    const handleConnectResponse = (status) => {
-        if(status === "connected"){
-            generateStream();
-        } else {
-            handleError("wrong");
-        }
-    }
-
     const handleClick = (type) => {
         switch (type) {
             case "cam":
@@ -213,13 +205,13 @@ function Conference({match, history}){
     }
 
     useEffect(() => {
-        socketRef.current = io();
+        socketRef.current = io("http://localhost:3001/");
         if(userName){
             const data = {
-                username: userName,
+                name: userName,
                 meetId: match.params.meetId
             }
-            socketRef.current.emit('joinViaLink', data, handleConnectResponse);
+            socketRef.current.emit('joinMeet', data, generateStream);
         } else {
             history.push(`/join/${match.params.meetId}`);
         }
