@@ -13,6 +13,7 @@ import {
     Holder,
     Utils,
     VideoContainer,
+    ContainerVideo,
     VideoHolder,
     ActionHolder,
     Actions,
@@ -100,21 +101,41 @@ function Conference({match, history}){
         }
     } 
 
+    const toggleVideoTracks = () => {
+        if(ownVideo.current.srcObject.getVideoTracks()[0].enabled){
+            ownVideo.current.srcObject.getVideoTracks()[0].enabled = false;
+
+            document.getElementById("videoOn").style.display = "none";
+            document.getElementById("videoOff").style.display = "flex";
+        } else {
+            ownVideo.current.srcObject.getVideoTracks()[0].enabled = true;
+
+            document.getElementById("videoOff").style.display = "none";
+            document.getElementById("videoOn").style.display = "flex";
+        }
+    }
+
+    const toggleAudioTracks = () => {
+        if(ownVideo.current.srcObject.getAudioTracks()[0].enabled){
+            ownVideo.current.srcObject.getAudioTracks()[0].enabled = false;
+
+            document.getElementById("audioOn").style.display = "none";
+            document.getElementById("audioOff").style.display = "flex";
+        } else {
+            ownVideo.current.srcObject.getAudioTracks()[0].enabled = true;
+
+            document.getElementById("audioOff").style.display = "none";
+            document.getElementById("audioOn").style.display = "flex";
+        }
+    }
+
     const handleClick = (type) => {
         switch (type) {
             case "cam":
-                if(videoStatus){
-                    setVideoStatus(false);
-                } else {
-                    setVideoStatus(true);
-                }
+                toggleVideoTracks();
                 break;
             case "mic":
-                if(audioStatus){
-                    setAudioStatus(false);
-                } else {
-                    setAudioStatus(true);
-                }
+                toggleAudioTracks();
                 break;
             default:
                 break;
@@ -153,67 +174,69 @@ function Conference({match, history}){
         return peer;
     }
 
-    const generateStream = () => {
-        navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: {
-                width: { ideal: 400},
-                height: {ideal: 400}
-            }
-        }).then((stream) => {
-            ownVideo.current.srcObject = stream;
-            socketRef.current.emit("getAllUsers", meetID);
-            socketRef.current.on("allUsers", users => {
-                const peers = [];
-                users.forEach(userID => {
-                    const peer = createPeer(userID[0], socketRef.current.id, stream);
-                    peersRef.current.push({
-                        peerID: userID[0],
-                        peer
-                    })
-                    peers.push(peer);
-                    setPeers(peers);
-                })
-            })
-
-            socketRef.current.on("userJoined", payload => {
-                const peer = addPeer(payload.signal, payload.callerID, stream);
-                peersRef.current.push({
-                    peerID: payload.callerID,
-                    peer
-                })
-
-                setPeers(users => [...users, peer]);
-            })
-
-            socketRef.current.on("receivingReturnSignal", payload => {
-                const item = peersRef.current.find(p => p.peerID === payload.id);
-                item.peer.signal(payload.signal);
-            })
-        })
-        .catch((err) => {
-            handleError("streamError");
-        })
-    }
-
     const PeerVideo = (props) => {
         const ref = useRef();
 
         useEffect(() => {
-            props.peer.on("stream", stream => {
+            console.log(props);
+            props.peer[0].on("stream", stream => {
                 ref.current.srcObject = stream;
             })
         }, []);
 
         return (
             <VideoHolder>
-                <OwnVideo playsInline autoPlay ref={ref} />
+                <OwnVideo id={`${props.peer[1]}`} playsInline autoPlay ref={ref} />
             </VideoHolder>
         )
     }
 
     useEffect(() => {
         socketRef.current = io("http://localhost:3001/");
+
+        const generateStream = () => {
+            navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: {
+                    width: { ideal: 400},
+                    height: {ideal: 400}
+                }
+            }).then((stream) => {
+                ownVideo.current.srcObject = stream;
+                socketRef.current.emit("getAllUsers", meetID);
+                socketRef.current.on("allUsers", users => {
+                    const peers = [];
+                    users.forEach(userID => {
+                        const peer = createPeer(userID[0], socketRef.current.id, stream);
+                        peersRef.current.push({
+                            peerID: userID[0],
+                            peer
+                        })
+                        peers.push([peer, userID[0]]);
+                        setPeers(peers);
+                    })
+                })
+    
+                socketRef.current.on("userJoined", payload => {
+                    const peer = addPeer(payload.signal, payload.callerID, stream);
+                    peersRef.current.push({
+                        peerID: payload.callerID,
+                        peer
+                    })
+    
+                    setPeers(users => [...users, [peer, payload.callerID]]);
+                })
+    
+                socketRef.current.on("receivingReturnSignal", payload => {
+                    const item = peersRef.current.find(p => p.peerID === payload.id);
+                    item.peer.signal(payload.signal);
+                })
+            })
+            .catch((err) => {
+                handleError("streamError");
+            })
+        }
+
         if(userName){
             const data = {
                 name: userName,
@@ -223,19 +246,21 @@ function Conference({match, history}){
         } else {
             history.push(`/join/${match.params.meetId}`);
         }
-    }, [match.params.meetId, userName]);
+    }, [match.params.meetId, userName, history]);
 
     return (
         <Container>
             <Holder>
-                <VideoContainer id="videoContainer">
-                    <VideoHolder>
-                        <OwnVideo muted ref={ownVideo} autoPlay playsInline />
-                    </VideoHolder>
-                    {peers.map((peer, index) => {
-                        return <PeerVideo key={index} peer={peer} />
-                    })}
-                </VideoContainer>
+                <ContainerVideo>
+                    <VideoContainer id="videoContainer">
+                        <VideoHolder>
+                            <OwnVideo id="ownVideo" muted ref={ownVideo} autoPlay playsInline />
+                        </VideoHolder>
+                        {peers.map((peer, index) => {
+                            return <PeerVideo key={index} peer={peer} />
+                        })}
+                    </VideoContainer>
+                </ContainerVideo>
                 <ActionHolder>
                     <Actions>
                         <div className={classes.iconHolder}>
@@ -244,12 +269,13 @@ function Conference({match, history}){
                         <div className={classes.iconHolder}>
                             <BiCamera 
                                 className={classes.iconStyle} 
-                                style={{display: videoStatus === false ? 'none' : 'flex'}}
+                                id="videoOn"
                                 onClick={() => handleClick("cam")}
                             />
                             <BiCameraOff 
                                 className={classes.iconStyle} 
-                                style={{display: videoStatus === false ? 'flex' : 'none'}} 
+                                id="videoOff"
+                                display="none"
                                 onClick={() => handleClick("cam")}
                             />
                         </div>

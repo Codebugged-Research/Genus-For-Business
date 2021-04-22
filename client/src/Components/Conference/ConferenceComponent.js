@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
     display: grid;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     grid-template-columns: 8fr 2fr;
     background-color: #2C3E50;
 `
@@ -22,12 +22,15 @@ export const Utils = styled.div`
     border-top-right-radius: 17px;
     border-bottom-right-radius: 17px;
 `
+
+export const ContainerVideo = styled.div`
+    padding: 10px;
+`
+
 export const VideoContainer = styled.div`
     display: grid;
     place-items: center;
-    padding: 5px 5px 0px 5px;
     grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
-    grid-template-rows: repeat(auto-fit, minmax(40%, 1fr));
     grid-gap: 10px;
     width: 100%;
     height: 100%;

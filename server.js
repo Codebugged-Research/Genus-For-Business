@@ -27,6 +27,12 @@ io.on('connection', socket => {
     socket.on('joinMeet', (data, generateStream) => {
 
         if(meetingUsers[data.meetId]){
+
+            meetingUsers[data.meetId].forEach((element) => {
+                if(element[0] === socket.id){
+                    return;
+                }
+            })
             socket.join(data.meetId);
             meetingUsers[data.meetId].push([socket.id, data.name]);
 
