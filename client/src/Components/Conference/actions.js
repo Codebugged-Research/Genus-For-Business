@@ -119,6 +119,21 @@ const createPeer = (userToSignal, callerID, stream) => {
         videoHandler(stream, peer._id);
     })
 
+    peer.on('error', (err) => {
+        myPeers.forEach((peers) => {
+            if(peers[1] === peer._id){
+                const vC = document.getElementById("videoContainer");
+                if(document.getElementById(peers[1])){
+                    vC.removeChild(document.getElementById(peers[1]));
+                }
+            }
+        })
+        peer.destroy(err);
+
+        var l = myPeers.filter(p => p[1] !== peer._id);
+        myPeers = l;
+    })
+
     socketOwn.on("accepted", (data) => {
         peer.signal(data.forYou);
     })
@@ -136,6 +151,8 @@ const acceptOthersCall = () => {
             stream: globalStream
         })
 
+        myPeers.push([peer, peer._id, payload.sender]);
+
         peer.on("signal", data => {
             socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender})
         })
@@ -144,9 +161,23 @@ const acceptOthersCall = () => {
             videoHandler(stream, peer._id);
         })
 
+        peer.on('error', (err) => {
+            myPeers.forEach((peers) => {
+                if(peers[1] === peer._id){
+                    const vCo = document.getElementById("videoContainer");
+                    if(document.getElementById(peers[1])){
+                        vCo.removeChild(document.getElementById(peers[1]));
+                    }
+                }
+            })
+            peer.destroy(err);
+
+            var le = myPeers.filter(p => p[1] !== peer._id);
+            myPeers = le;
+        })
+
         peer.signal(payload.mySignal);
     })
-
 }
 
 export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
@@ -178,11 +209,10 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
             const peers = [];
             users.forEach(userID => {
                 const peer = createPeer(userID[0], socket.id, stream, createPeerVideo);
-                peers.push([peer, userID[0]]);
+                peers.push([peer, peer._id ,userID[0]]);
             })
             myPeers = peers;
         })
-
     })
     .catch((err) => {
         errorToast("streamError");

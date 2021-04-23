@@ -96,10 +96,6 @@ function Conference({match, history}){
 
         newVideoHolder.appendChild(newVideo);
         document.getElementById("videoContainer").appendChild(newVideoHolder);
-
-        document.getElementById(`video_${id}`).addEventListener('loadedmetadata', () => {
-            document.getElementById(`video_${id}`).play();
-        })
     }
 
     const errorToast = (type) => {
