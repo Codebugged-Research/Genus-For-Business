@@ -62,6 +62,10 @@ io.on('connection', socket => {
             id: socket.id
         })
     })
+
+    socket.on("callUserGetStream", (data) => {
+        io.to(data.toCall).emit("handshake", {mySignal: data.dataSentAlong, sender: data.sender, name: data.name});
+    })
 })
 
 server.listen(`${process.env.PORT}`, (req, res) => {

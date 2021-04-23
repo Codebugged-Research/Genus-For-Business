@@ -57,49 +57,11 @@ function Conference({match, history}){
     const toast = useToast();
     const toast_id = "toast-id";
  
-    var screenShareIndicator = false;
-    var sharedStream;
-
     const [peers, setPeers] = useState([]);
     const socketRef = useRef();
     const ownVideo = useRef();
     const peersRef = useRef([]);
     const meetID = match.params.meetId;
-
-    const handleShareScreen = () => { 
-        const shareBtn = document.getElementById("shareBtn");
-
-        if(!screenShareIndicator){
-            navigator.mediaDevices.getDisplayMedia({cursor: true})
-            .then((sharedScreen) => {
-
-                screenShareIndicator = true;
-                sharedStream = sharedScreen;
-                shareBtn.disabled = true;
-
-                if(peers.length !== 0){
-                    peers.forEach((peerElem) => {
-                        peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
-                    })
-                }
-
-                sharedScreen.getTracks()[0].onended = () => {
-                    screenShareIndicator = false;
-                    shareBtn.disabled = false;
-
-                    if(peers.length !== 0){
-                        peers.forEach((peerElem) => {
-                            peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], ownVideo.current.srcObject.getVideoTracks()[0], ownVideo.current.srcObject);
-                        })
-                    }
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-
-            })
-        }
-    }
 
     const handleConnectLink = () => {
         if(!toast.isActive(toast_id)){
@@ -143,18 +105,11 @@ function Conference({match, history}){
         return peer;
     }
 
-    const PeerVideo = (props) => {
-        const ref = useRef();
-
-        useEffect(() => {
-            props.peer[0].on("stream", stream => {
-                ref.current.srcObject = stream;
-            })
-        }, [props.peer]);
+    const createPeerVideo = (stream, id) => {
 
         return (
-            <VideoHolder>
-                <OwnVideo id={`${props.peer[1]}`} playsInline autoPlay ref={ref} />
+            <VideoHolder id={id}>
+                <OwnVideo playsInline autoPlay srcObject={stream} />
             </VideoHolder>
         )
     }
@@ -233,7 +188,7 @@ function Conference({match, history}){
         }
 
         socketRef.current.on("intializeStream", () => {
-            actions(match.params.meetId, socketRef.current, errorToast);
+            actions(userName, match.params.meetId, socketRef.current, errorToast, createPeerVideo);
         })
 
         if(userName){
@@ -255,9 +210,7 @@ function Conference({match, history}){
                         <VideoHolder>
                             <OwnVideo id="ownVideo" />
                         </VideoHolder>
-                        {peers.map((peer, index) => {
-                            return <PeerVideo key={index} peer={peer} />
-                        })}
+                        {createPeerVideo}
                     </VideoContainer>
                 </ContainerVideo>
                 <ActionHolder>
@@ -292,7 +245,7 @@ function Conference({match, history}){
                             />
                         </div>
                         <div className={classes.iconHolder}>
-                            <MdTv className={classes.iconStyle} onClick={handleShareScreen} id="shareBtn" />
+                            <MdTv className={classes.iconStyle} id="shareBtn" />
                         </div>
                         <div className={classes.iconHolder}>
                             <MdCallEnd className={classes.iconStyle} />
