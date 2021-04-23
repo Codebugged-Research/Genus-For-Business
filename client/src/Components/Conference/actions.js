@@ -149,22 +149,6 @@ const acceptOthersCall = () => {
 
 }
 
-const addPeer = (incomingSignal, callerID, stream) => {
-    const peer = new Peer({
-        initiator: false,
-        trickle: false,
-        wrtc: wrtc,
-        stream
-    })
-
-    peer.on("signal", signal => {
-        socketOwn.emit("", signal, callerID)
-    })
-
-    peer.signal(incomingSignal);
-    return peer;
-}
-
 export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
     navigator.mediaDevices.getUserMedia({
         video: {
@@ -199,10 +183,6 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
             myPeers = peers;
         })
 
-        socket.on("userJoined", payload => {
-            const peer = addPeer(payload.signal, payload.callerID, stream, createPeerVideo);
-
-        })
     })
     .catch((err) => {
         errorToast("streamError");

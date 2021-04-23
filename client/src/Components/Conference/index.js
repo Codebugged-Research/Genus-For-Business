@@ -72,6 +72,7 @@ function Conference({match, history}){
     const handleConnectLink = () => {
         if(!toast.isActive(toast_id)){
             toast({
+                id: toast_id,
                 title: "Share Meeting Link",
                 description: `http://localhost:3000/join/${match.params.meetId}`,
                 duration: 3000,

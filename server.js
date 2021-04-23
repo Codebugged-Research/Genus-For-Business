@@ -39,7 +39,6 @@ io.on('connection', socket => {
         } else {
             meetingUsers[data.meetId] = [[socket.id, data.name]];
             socket.join(data.meetId);
-            
         }
         socket.emit("intializeStream");
     })
