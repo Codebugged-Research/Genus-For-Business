@@ -18,7 +18,6 @@ import { useToast } from '@chakra-ui/react';
 import { actions } from './actions';
 
 const io = require('socket.io-client');
-const wrtc = require('wrtc');
 
 const useStyles = makeStyles((theme) => ({
     iconHolder: {
@@ -47,6 +46,17 @@ const useStyles = makeStyles((theme) => ({
         fontFamily: 'Nunito',
         fontWeight: '600',
         fontSize: '20px'
+    },
+    videoHolder: {
+        display: 'grid',
+        placeItems: 'center'
+    },
+    videoClass: {
+        borderRadius: '15px',
+        overflow: 'hidden',
+        transform: 'scaleX(-1)',
+        width: '100%',
+        height: '100%',
     }
 }));
 
@@ -57,11 +67,7 @@ function Conference({match, history}){
     const toast = useToast();
     const toast_id = "toast-id";
  
-    const [peers, setPeers] = useState([]);
     const socketRef = useRef();
-    const ownVideo = useRef();
-    const peersRef = useRef([]);
-    const meetID = match.params.meetId;
 
     const handleConnectLink = () => {
         if(!toast.isActive(toast_id)){
@@ -74,44 +80,25 @@ function Conference({match, history}){
         }
     }
 
-    const createPeer = (userToSignal, callerID, stream) => {
-        const peer = new Peer({
-            initiator: true,
-            trickle: false,
-            wrtc: wrtc,
-            stream
-        })
-
-        peer.on("signal", signal => {
-            socketRef.current.emit("sendingSignal", userToSignal, callerID, signal)
-        })
-
-        return peer;
-    }
-
-    const addPeer = (incomingSignal, callerID, stream) => {
-        const peer = new Peer({
-            initiator: false,
-            trickle: false,
-            wrtc: wrtc,
-            stream
-        })
-
-        peer.on("signal", signal => {
-            socketRef.current.emit("returningSignal", signal, callerID)
-        })
-
-        peer.signal(incomingSignal);
-        return peer;
-    }
-
     const createPeerVideo = (stream, id) => {
 
-        return (
-            <VideoHolder id={id}>
-                <OwnVideo playsInline autoPlay srcObject={stream} />
-            </VideoHolder>
-        )
+        var newVideoHolder = document.createElement("div");
+        newVideoHolder.setAttribute("id", `${id}`);
+        newVideoHolder.setAttribute("class", "videoHolder");
+
+        var newVideo = document.createElement("video");
+        newVideo.srcObject = stream;
+        newVideo.setAttribute("id", `video_${id}`);
+        newVideo.setAttribute("class", "videoClass");
+        newVideo.setAttribute("playsInline", true);
+        newVideo.setAttribute("autoPlay", true);
+
+        newVideoHolder.appendChild(newVideo);
+        document.getElementById("videoContainer").appendChild(newVideoHolder);
+
+        document.getElementById(`video_${id}`).addEventListener('loadedmetadata', () => {
+            document.getElementById(`video_${id}`).play();
+        })
     }
 
     const errorToast = (type) => {
@@ -144,49 +131,6 @@ function Conference({match, history}){
     useEffect(() => {
         socketRef.current = io("http://localhost:3001/");
 
-        const generateStream = () => {
-            navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: {
-                    width: { ideal: 300},
-                    height: {ideal: 300}
-                }
-            }).then((stream) => {
-                ownVideo.current.srcObject = stream;
-                socketRef.current.emit("getAllUsers", meetID);
-                socketRef.current.on("allUsers", users => {
-                    const peers = [];
-                    users.forEach(userID => {
-                        const peer = createPeer(userID[0], socketRef.current.id, stream);
-                        peersRef.current.push({
-                            peerID: userID[0],
-                            peer
-                        })
-                        peers.push([peer, userID[0]]);
-                    })
-                    setPeers(peers);
-                })
-    
-                socketRef.current.on("userJoined", payload => {
-                    const peer = addPeer(payload.signal, payload.callerID, stream);
-                    peersRef.current.push({
-                        peerID: payload.callerID,
-                        peer
-                    })
-
-                    setPeers(p => [...p, [peer, payload.callerID]]);
-                })
-    
-                socketRef.current.on("receivingReturnSignal", payload => {
-                    const item = peersRef.current.find(p => p.peerID === payload.id);
-                    item.peer.signal(payload.signal);
-                }) 
-            })
-            .catch((err) => {
-
-            })
-        }
-
         socketRef.current.on("intializeStream", () => {
             actions(userName, match.params.meetId, socketRef.current, errorToast, createPeerVideo);
         })
@@ -210,7 +154,6 @@ function Conference({match, history}){
                         <VideoHolder>
                             <OwnVideo id="ownVideo" />
                         </VideoHolder>
-                        {createPeerVideo}
                     </VideoContainer>
                 </ContainerVideo>
                 <ActionHolder>

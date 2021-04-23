@@ -6,6 +6,7 @@ var globalStream;
 var socketOwn;
 var meetID;
 var videoHandler;
+var yourName;
 
 var screenShareIndicator = false;
 var sharedStream;
@@ -96,7 +97,7 @@ const toggleAudioTracks = () => {
 //     }
 // }
 
-const createPeer = (userToSignal, callerID, stream, createPeerVideo) => {
+const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({
         initiator: true,
         trickle: false,
@@ -115,7 +116,7 @@ const createPeer = (userToSignal, callerID, stream, createPeerVideo) => {
     })
 
     peer.on("stream", stream => {
-        videoHandler(stream, peer.id);
+        videoHandler(stream, peer._id);
     })
 
     socketOwn.on("accepted", (data) => {
@@ -123,6 +124,29 @@ const createPeer = (userToSignal, callerID, stream, createPeerVideo) => {
     })
 
     return peer;
+}
+
+const acceptOthersCall = () => {
+    socketOwn.on("handshake", (payload) => {
+
+        const peer = new Peer({
+            initiator: false,
+            trickle: false,
+            wrtc: wrtc,
+            stream: globalStream
+        })
+
+        peer.on("signal", data => {
+            socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender})
+        })
+
+        peer.on("stream", (stream) => {
+            videoHandler(stream, peer._id);
+        })
+
+        peer.signal(payload.mySignal);
+    })
+
 }
 
 const addPeer = (incomingSignal, callerID, stream) => {
@@ -134,7 +158,7 @@ const addPeer = (incomingSignal, callerID, stream) => {
     })
 
     peer.on("signal", signal => {
-        socketOwn.emit("returningSignal", signal, callerID)
+        socketOwn.emit("", signal, callerID)
     })
 
     peer.signal(incomingSignal);
@@ -150,6 +174,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
         audio: true
     })
     .then((stream) => {
+        yourName = name;
         globalStream = stream;
         socketOwn = socket;
         meetID = meetId;
@@ -161,6 +186,8 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
 
         toggleVideoTracks();
         toggleAudioTracks();
+
+        acceptOthersCall();
 
         socket.emit("getAllUsers", meetId);
         socket.on("allUsers", users => {

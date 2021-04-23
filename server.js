@@ -49,22 +49,12 @@ io.on('connection', socket => {
         socket.emit("allUsers", usersHere);
     })
 
-    socket.on("sendingSignal", (userToSignal, callerID, signal) => {
-        io.to(userToSignal).emit('userJoined', {
-            signal: signal,
-            callerID: callerID
-        })
-    })
-
-    socket.on("returningSignal", (signal, callerID) => {
-        io.to(callerID).emit("receivingReturnSignal", {
-            signal: signal,
-            id: socket.id
-        })
-    })
-
     socket.on("callUserGetStream", (data) => {
         io.to(data.toCall).emit("handshake", {mySignal: data.dataSentAlong, sender: data.sender, name: data.name});
+    })
+
+    socket.on("handshakeAccepted", (data) => {
+        io.to(data.for).emit("accepted", {forYou: data.acceptor});
     })
 })
 
