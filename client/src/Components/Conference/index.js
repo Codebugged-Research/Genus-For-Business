@@ -113,6 +113,12 @@ function Conference({match, history}){
                 sharedScreen.getTracks()[0].onended = () => {
                     screenShareIndicator = false;
                     shareBtn.disabled = false;
+
+                    if(peers.length !== 0){
+                        peers.forEach((peerElem) => {
+                            peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], ownVideo.current.srcObject.getVideoTracks()[0], ownVideo.current.srcObject);
+                        })
+                    }
                 }
             })
             .catch((err) => {
@@ -181,16 +187,17 @@ function Conference({match, history}){
         })
 
         peer.signal(incomingSignal);
-
         return peer;
     }
 
     const PeerVideo = (props) => {
         const ref = useRef();
 
+        console.log("Peer", props.peer);
         useEffect(() => {
             props.peer[0].on("stream", stream => {
                 ref.current.srcObject = stream;
+                console.log("Stream", stream);
             })
         }, []);
 
@@ -208,8 +215,8 @@ function Conference({match, history}){
             navigator.mediaDevices.getUserMedia({
                 audio: true,
                 video: {
-                    width: { ideal: 400},
-                    height: {ideal: 400}
+                    width: { ideal: 300},
+                    height: {ideal: 300}
                 }
             }).then((stream) => {
                 ownVideo.current.srcObject = stream;
@@ -223,8 +230,8 @@ function Conference({match, history}){
                             peer
                         })
                         peers.push([peer, userID[0]]);
-                        setPeers(peers);
                     })
+                    setPeers(peers);
                 })
     
                 socketRef.current.on("userJoined", payload => {
@@ -233,14 +240,15 @@ function Conference({match, history}){
                         peerID: payload.callerID,
                         peer
                     })
-    
-                    setPeers(users => [...users, [peer, payload.callerID]]);
+                    
+                    peers.push([peer, payload.callerID]);
+                    setPeers(peers);
                 })
     
                 socketRef.current.on("receivingReturnSignal", payload => {
                     const item = peersRef.current.find(p => p.peerID === payload.id);
                     item.peer.signal(payload.signal);
-                })
+                }) 
             })
             .catch((err) => {
                 if(!toast.isActive(toast_id)){

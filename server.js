@@ -36,7 +36,6 @@ io.on('connection', socket => {
             socket.join(data.meetId);
             meetingUsers[data.meetId].push([socket.id, data.name]);
 
-            // io.to(data.meetId).emit("newJoinee", data.name);
             generateStream();
         } else {
             meetingUsers[data.meetId] = [[socket.id, data.name]];
@@ -48,6 +47,7 @@ io.on('connection', socket => {
 
     socket.on("getAllUsers", (meetId) => {
         const usersHere = meetingUsers[meetId].filter(id => id[0] !== socket.id);
+        console.log(usersHere);
         socket.emit("allUsers", usersHere);
     })
 
