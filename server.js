@@ -36,13 +36,12 @@ io.on('connection', socket => {
             socket.join(data.meetId);
             meetingUsers[data.meetId].push([socket.id, data.name]);
 
-            generateStream();
         } else {
             meetingUsers[data.meetId] = [[socket.id, data.name]];
             socket.join(data.meetId);
-
-            generateStream();
+            
         }
+        socket.emit("intializeStream");
     })
 
     socket.on("getAllUsers", (meetId) => {

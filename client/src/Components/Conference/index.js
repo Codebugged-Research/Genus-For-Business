@@ -15,6 +15,7 @@ import {
 import { MdTv, MdCallEnd } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
 import { useToast } from '@chakra-ui/react';
+import { actions } from './actions';
 
 const io = require('socket.io-client');
 const wrtc = require('wrtc');
@@ -65,34 +66,6 @@ function Conference({match, history}){
     const peersRef = useRef([]);
     const meetID = match.params.meetId;
 
-    const toggleVideoTracks = () => {
-        if(ownVideo.current.srcObject.getVideoTracks()[0].enabled){
-            ownVideo.current.srcObject.getVideoTracks()[0].enabled = false;
-
-            document.getElementById("videoOn").style.display = "none";
-            document.getElementById("videoOff").style.display = "flex";
-        } else {
-            ownVideo.current.srcObject.getVideoTracks()[0].enabled = true;
-
-            document.getElementById("videoOff").style.display = "none";
-            document.getElementById("videoOn").style.display = "flex";
-        }
-    }
-
-    const toggleAudioTracks = () => {
-        if(ownVideo.current.srcObject.getAudioTracks()[0].enabled){
-            ownVideo.current.srcObject.getAudioTracks()[0].enabled = false;
-
-            document.getElementById("audioOn").style.display = "none";
-            document.getElementById("audioOff").style.display = "flex";
-        } else {
-            ownVideo.current.srcObject.getAudioTracks()[0].enabled = true;
-
-            document.getElementById("audioOff").style.display = "none";
-            document.getElementById("audioOn").style.display = "flex";
-        }
-    }
-
     const handleShareScreen = () => { 
         const shareBtn = document.getElementById("shareBtn");
 
@@ -123,14 +96,7 @@ function Conference({match, history}){
             })
             .catch((err) => {
                 console.log(err);
-                if(!toast.isActive(toast_id)){
-                    toast({
-                        title: "Screen Share Error",
-                        description: "An error ocurred while trying to share your screen!",
-                        duration: 3000,
-                        position: "top-right"
-                    })
-                }
+
             })
         }
     }
@@ -143,19 +109,6 @@ function Conference({match, history}){
                 duration: 3000,
                 position: "top-right"
             })
-        }
-    }
-
-    const handleClick = (type) => {
-        switch (type) {
-            case "cam":
-                toggleVideoTracks();
-                break;
-            case "mic":
-                toggleAudioTracks();
-                break;
-            default:
-                break;
         }
     }
 
@@ -206,6 +159,33 @@ function Conference({match, history}){
         )
     }
 
+    const errorToast = (type) => {
+        switch (type) {
+            case "streamError":
+                if(!toast.isActive(toast_id)){
+                    toast({
+                        title: "Stream Fetch Error",
+                        description: "An error ocurred while trying to fetch your stream",
+                        duration: 3000,
+                        position: "top-right"
+                    })
+                }
+                break;
+            case "shareError":
+                if(!toast.isActive(toast_id)){
+                    toast({
+                        title: "Screen Share Error",
+                        description: "An error ocurred while trying to share your screen!",
+                        duration: 3000,
+                        position: "top-right"
+                    })
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     useEffect(() => {
         socketRef.current = io("http://localhost:3001/");
 
@@ -248,23 +228,20 @@ function Conference({match, history}){
                 }) 
             })
             .catch((err) => {
-                if(!toast.isActive(toast_id)){
-                    toast({
-                        title: "Stream Fetch Error",
-                        description: "An error ocurred while trying to fetch your stream",
-                        duration: 3000,
-                        position: "top-right"
-                    })
-                }
+
             })
         }
+
+        socketRef.current.on("intializeStream", () => {
+            actions(match.params.meetId, socketRef.current, errorToast);
+        })
 
         if(userName){
             const data = {
                 name: userName,
                 meetId: match.params.meetId
             }
-            socketRef.current.emit('joinMeet', data, generateStream);
+            socketRef.current.emit('joinMeet', data);
         } else {
             history.push(`/join/${match.params.meetId}`);
         }
@@ -276,7 +253,7 @@ function Conference({match, history}){
                 <ContainerVideo>
                     <VideoContainer id="videoContainer">
                         <VideoHolder>
-                            <OwnVideo id="ownVideo" muted ref={ownVideo} autoPlay playsInline />
+                            <OwnVideo id="ownVideo" />
                         </VideoHolder>
                         {peers.map((peer, index) => {
                             return <PeerVideo key={index} peer={peer} />
@@ -288,30 +265,30 @@ function Conference({match, history}){
                         <div className={classes.iconHolder}>
                             <BiErrorCircle className={classes.iconStyle} onClick = {handleConnectLink} />
                         </div>
-                        <div className={classes.iconHolder}>
+                        <div className={classes.iconHolder} id="stopVideo">
                             <BiCamera 
                                 className={classes.iconStyle} 
                                 id="videoOn"
-                                onClick={() => handleClick("cam")}
+                                
                             />
                             <BiCameraOff 
                                 className={classes.iconStyle} 
                                 id="videoOff"
                                 style={{display: "none"}}
-                                onClick={() => handleClick("cam")}
+                                
                             />
                         </div>
-                        <div className={classes.iconHolder}>
+                        <div className={classes.iconHolder} id="stopAudio">
                             <BiMicrophone 
                                 className={classes.iconStyle} 
                                 id="audioOn"
-                                onClick={() => handleClick("mic")}
+                                
                             />
                             <BiMicrophoneOff 
                                 className={classes.iconStyle} 
                                 style={{display: "none"}} 
                                 id="audioOff"
-                                onClick={() => handleClick("mic")}
+                                
                             />
                         </div>
                         <div className={classes.iconHolder}>
