@@ -197,7 +197,7 @@ function Conference({match, history}){
             props.peer[0].on("stream", stream => {
                 ref.current.srcObject = stream;
             })
-        }, []);
+        }, [props.peer]);
 
         return (
             <VideoHolder>
@@ -239,9 +239,7 @@ function Conference({match, history}){
                         peer
                     })
 
-                    peers.push([peer, payload.callerID]);
-
-                    setPeers(peers);
+                    setPeers(p => [...p, [peer, payload.callerID]]);
                 })
     
                 socketRef.current.on("receivingReturnSignal", payload => {
