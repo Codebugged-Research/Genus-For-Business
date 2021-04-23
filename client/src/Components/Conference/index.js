@@ -193,11 +193,9 @@ function Conference({match, history}){
     const PeerVideo = (props) => {
         const ref = useRef();
 
-        console.log("Peer", props.peer);
         useEffect(() => {
             props.peer[0].on("stream", stream => {
                 ref.current.srcObject = stream;
-                console.log("Stream", stream);
             })
         }, []);
 
@@ -240,8 +238,9 @@ function Conference({match, history}){
                         peerID: payload.callerID,
                         peer
                     })
-                    
+
                     peers.push([peer, payload.callerID]);
+
                     setPeers(peers);
                 })
     

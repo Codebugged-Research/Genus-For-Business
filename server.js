@@ -47,7 +47,6 @@ io.on('connection', socket => {
 
     socket.on("getAllUsers", (meetId) => {
         const usersHere = meetingUsers[meetId].filter(id => id[0] !== socket.id);
-        console.log(usersHere);
         socket.emit("allUsers", usersHere);
     })
 
