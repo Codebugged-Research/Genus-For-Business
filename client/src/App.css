@@ -10,3 +10,42 @@
   width: 100%;
   height: 100%;
 }
+
+.messages{
+  width: 100%;
+  overflow: auto;
+  height: 90%;
+}
+
+::-webkit-scrollbar{
+  width: 1px;
+  background-color: black;
+}
+
+.newMessageHolderYou{
+  display: flex;
+  justify-items: end;
+  align-items: flex-end;
+  width: 100%;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.newMessageHolder{
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.titleMessage{
+  font-family: 'Nunito', 'serif';
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.message{
+  font-family: 'Nunito', 'serif';
+  font-size: 16px;
+}

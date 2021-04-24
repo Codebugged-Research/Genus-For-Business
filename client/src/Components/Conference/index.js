@@ -112,7 +112,7 @@ function Conference({match, history}){
         const messageContainer = document.getElementById("messageHolder");
 
         const newMessage = document.createElement('div');
-        newMessage.setAttribute('class', 'newMessageHolder');
+        newMessage.setAttribute('class', 'newMessageHolderYou');
         
         newMessage.innerHTML = `
             <div class="titleMessage">${sender}</div>
@@ -282,8 +282,7 @@ function Conference({match, history}){
                         <Typography className={classes.sectionTitle}>Chat</Typography>
                     </AccordionSummary>
                     <AccordionDetails style={{height: '75vh', position:'relative'}}>
-                        <div id="messageHolder">
-
+                        <div id="messageHolder" className="messages">
                         </div>
                         <form onSubmit={handleMessage} className={classes.messageForm}>
                             <Input
