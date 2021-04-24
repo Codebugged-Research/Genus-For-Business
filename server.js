@@ -59,6 +59,15 @@ io.on('connection', socket => {
     socket.on("messageResponse", (message) => {
         console.log(message);
     })
+
+    socket.on("disconnectCall", (meetID, socketID, disconnected) => {
+        if(meetingUsers[meetID]){
+            meetingUsers[meetID] = meetingUsers[meetID].filter(id => id[0] !== socketID);
+
+            disconnected();
+            io.to(meetID).emit("thisUserDisconnected", socketID);
+        }
+    })
 })
 
 server.listen(`${process.env.PORT}`, (req, res) => {

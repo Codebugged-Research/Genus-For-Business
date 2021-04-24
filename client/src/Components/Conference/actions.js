@@ -210,13 +210,32 @@ const disconnectFromCall = () => {
 
     if(disconnect){
         disconnect.addEventListener("click", () => {
-            socketOwn.emit('disconnect', meetID, socketOwn.id, disconnected);
+            socketOwn.emit('disconnectCall', meetID, socketOwn.id, disconnected);
         })
     }
 }
 
 const disconnected = () => {
     window.location.href = "http://localhost:3000";
+}
+
+const thisUserDisconnected = () => {
+
+    socketOwn.on("thisUserDisconnected", (userID) => {
+        myPeers.forEach((peer) => {
+            if(peer[2] === userID){
+                const vC1 = document.getElementById("videoContainer");
+                if(document.getElementById(peer[1])){
+                    vC1.removeChild(document.getElementById(peer[1]));
+                }
+            }
+            peer[0].destroy();
+        })
+
+        var lee = myPeers.filter(p => p[2] !== userID);
+        myPeers = lee;
+        containerStyleCheck();
+    })
 }
 
 export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
@@ -243,6 +262,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
 
         acceptOthersCall();
         disconnectFromCall();
+        thisUserDisconnected();
 
         socket.emit("getAllUsers", meetId);
         socket.on("allUsers", users => {
