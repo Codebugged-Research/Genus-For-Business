@@ -112,7 +112,6 @@ function Conference({match, history}){
         const messageContainer = document.getElementById("messageHolder");
 
         const newMessage = document.createElement('div');
-        newMessage.setAttribute('id', socketRef.current.id);
         newMessage.setAttribute('class', 'newMessageHolder');
         
         newMessage.innerHTML = `
@@ -192,6 +191,20 @@ function Conference({match, history}){
 
         socketRef.current.on("intializeStream", () => {
             actions(userName, match.params.meetId, socketRef.current, errorToast, createPeerVideo);
+        })
+
+        socketRef.current.on("newMessage", (name, message) => {
+            const messCont = document.getElementById("messageHolder");
+    
+            const newMess = document.createElement('div');
+            newMess.setAttribute('class', 'newMessageHolder');
+    
+            newMess.innerHTML = `
+                <div class="titleMessage">${name}</div>
+                <div class="message">${message}</div>
+            `
+    
+            messCont.appendChild(newMess);
         })
 
         if(userName){
