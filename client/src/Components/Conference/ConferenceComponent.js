@@ -30,10 +30,11 @@ export const ContainerVideo = styled.div`
 export const VideoContainer = styled.div`
     display: grid;
     place-items: center;
-    grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(20%, 0.75fr));
     grid-gap: 10px;
     width: 100%;
     height: 100%;
+    overflow: auto;
 `
 
 export const VideoHolder = styled.div`

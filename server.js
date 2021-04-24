@@ -55,6 +55,10 @@ io.on('connection', socket => {
     socket.on("handshakeAccepted", (data) => {
         io.to(data.for).emit("accepted", {forYou: data.acceptor});
     })
+
+    socket.on("messageResponse", (message) => {
+        console.log(message);
+    })
 })
 
 server.listen(`${process.env.PORT}`, (req, res) => {

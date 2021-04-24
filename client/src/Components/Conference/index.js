@@ -11,7 +11,7 @@ import {
     Actions,
     OwnVideo
 } from './ConferenceComponent';
-import { MdTv, MdCallEnd, MdExpandMore } from 'react-icons/md';
+import { MdTv, MdCallEnd, MdExpandMore, MdSend } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
 import { useToast } from '@chakra-ui/react';
 import { actions } from './actions';
@@ -19,6 +19,8 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import Typography from '@material-ui/core/Typography';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
+import Input from '@material-ui/core/Input';
+import Button from '@material-ui/core/Button';
 
 const io = require('socket.io-client');
 
@@ -71,7 +73,22 @@ const useStyles = makeStyles((theme) => ({
     },
     sectionTitle: {
         fontFamily: 'Nunito',
-        fontSize: '18px'
+        fontSize: '18px',
+        fontWeight: 600
+    },
+    messageForm: {
+        display: 'inline-flex',
+        position: 'absolute',
+        bottom: 15
+    },
+    inputMessage: {
+        color: 'white',
+        fontFamily: 'Nunito',
+        fontSize: '15px',
+        display: 'inline-flex'
+    },
+    btnFormMessage: {
+        display: 'inline-flex'
     }
 }));
 
@@ -83,10 +100,21 @@ function Conference({match, history}){
     const toast_id = "toast-id";
 
     const [expanded, setExpanded] = useState('chatpanel');
+    const [message, setMessage] = useState("");
+
     const socketRef = useRef();
 
     const handleChange = (panel) => (e, newpanel) => {
         setExpanded(newpanel ? panel : 'chatpanel');
+    }
+    
+    const handleMessage = (e) => {
+        e.preventDefault();
+
+        if(message !== ""){
+            socketRef.current.emit('messageResponse', userName ,message);
+            setMessage("");
+        }
     }
 
     const handleConnectLink = () => {
@@ -227,12 +255,25 @@ function Conference({match, history}){
                 <Accordion expanded={expanded === 'chatpanel'} className={classes.accordionStyles} onChange={handleChange('chatpanel')}>
                     <AccordionSummary
                         expandIcon={<MdExpandMore style={{color: 'white'}} />}
-                        
                     >
                         <Typography className={classes.sectionTitle}>Chat</Typography>
                     </AccordionSummary>
                     <AccordionDetails style={{height: '75vh', position:'relative'}}>
-                        
+                        <div id="messageHolder">
+                            
+                        </div>
+                        <form onSubmit={handleMessage} className={classes.messageForm}>
+                            <Input
+                                className={classes.inputMessage}
+                                value={message}
+                                onChange={e=>setMessage(e.target.value)}
+                                placeholder="Type your message"
+                                variant="outlined"
+                            />
+                            <Button className={classes.btnFormMessage} type="submit">
+                                <MdSend style={{color: 'white'}}/>
+                            </Button>
+                        </form>
                     </AccordionDetails>
                 </Accordion>
             </Utils>

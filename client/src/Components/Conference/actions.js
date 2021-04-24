@@ -193,7 +193,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
     navigator.mediaDevices.getUserMedia({
         video: {
             width: 300,
-            height: 300
+            height: 200
         },
         audio: true
     })
