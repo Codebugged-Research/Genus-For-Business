@@ -212,33 +212,29 @@ function Conference({match, history}){
                             <BiCamera 
                                 className={classes.iconStyle} 
                                 id="videoOn"
-                                
                             />
                             <BiCameraOff 
                                 className={classes.iconStyle} 
                                 id="videoOff"
                                 style={{display: "none"}}
-                                
                             />
                         </div>
                         <div className={classes.iconHolder} id="stopAudio">
                             <BiMicrophone 
                                 className={classes.iconStyle} 
                                 id="audioOn"
-                                
                             />
                             <BiMicrophoneOff 
                                 className={classes.iconStyle} 
                                 style={{display: "none"}} 
                                 id="audioOff"
-                                
                             />
                         </div>
                         <div className={classes.iconHolder}>
                             <MdTv className={classes.iconStyle} id="shareBtn" />
                         </div>
                         <div className={classes.iconHolder}>
-                            <MdCallEnd className={classes.iconStyle} />
+                            <MdCallEnd className={classes.iconStyle} id="disconnectCall" />
                         </div>
                     </Actions>
                 </ActionHolder>

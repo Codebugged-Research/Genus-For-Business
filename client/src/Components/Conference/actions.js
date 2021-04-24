@@ -204,6 +204,21 @@ const acceptOthersCall = () => {
     })
 }
 
+const disconnectFromCall = () => {
+
+    const disconnect = document.getElementById("disconnectCall");
+
+    if(disconnect){
+        disconnect.addEventListener("click", () => {
+            socketOwn.emit('disconnect', meetID, socketOwn.id, disconnected);
+        })
+    }
+}
+
+const disconnected = () => {
+    window.location.href = "http://localhost:3000";
+}
+
 export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
     navigator.mediaDevices.getUserMedia({
         video: {
@@ -227,6 +242,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
         toggleAudioTracks();
 
         acceptOthersCall();
+        disconnectFromCall();
 
         socket.emit("getAllUsers", meetId);
         socket.on("allUsers", users => {
