@@ -159,6 +159,17 @@ function Conference({match, history}){
         document.getElementById("videoContainer").appendChild(newVideoHolder);
     }
 
+    const createParticipant = (name, peerID) => {
+        const participantHolder = document.getElementById("partList");
+
+        const newPart = document.createElement("div");
+        newPart.setAttribute("id", `${peerID}`);
+        newPart.setAttribute('class', 'participant');
+
+        newPart.innerText = name;
+        participantHolder.appendChild(newPart);
+    }
+
     const errorToast = (type) => {
         switch (type) {
             case "streamError":
@@ -190,7 +201,7 @@ function Conference({match, history}){
         socketRef.current = io("http://localhost:3001/");
 
         socketRef.current.on("intializeStream", () => {
-            actions(userName, match.params.meetId, socketRef.current, errorToast, createPeerVideo);
+            actions(userName, match.params.meetId, socketRef.current, errorToast, createPeerVideo, createParticipant);
         })
 
         socketRef.current.on("newMessage", (name, message) => {
@@ -272,7 +283,7 @@ function Conference({match, history}){
                         <Typography className={classes.sectionTitle}>Participants</Typography>
                     </AccordionSummary>
                     <AccordionDetails style={{height: '75vh'}}>
-
+                        <div id="partList"></div>
                     </AccordionDetails>
                 </Accordion>
                 <Accordion expanded={expanded === 'chatpanel'} className={classes.accordionStyles} onChange={handleChange('chatpanel')}>

@@ -4,11 +4,13 @@ const wrtc = require('wrtc');
 var globalStream;
 var socketOwn;
 var meetID;
-var videoHandler;
 var yourName;
 
 var screenShareIndicator = false;
 var sharedStream;
+
+var videoHandler;
+var addParticipant;
 
 var myPeers = [];
 
@@ -110,7 +112,7 @@ const containerStyleCheck = () => {
     }
 }
 
-const createPeer = (userToSignal, callerID, stream) => {
+const createPeer = (userToSignal, userToCallName, callerID, stream) => {
     const peer = new Peer({
         initiator: true,
         trickle: false,
@@ -136,6 +138,7 @@ const createPeer = (userToSignal, callerID, stream) => {
 
     peer.on("stream", stream => {
         videoHandler(stream, peer._id);
+        addParticipant(userToCallName, peer._id);
         containerStyleCheck();
     })
 
@@ -238,7 +241,7 @@ const thisUserDisconnected = () => {
     })
 }
 
-export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
+export const actions = (name, meetId, socket, errorToast, createPeerVideo, createParticipant) => {
     navigator.mediaDevices.getUserMedia({
         video: {
             width: 300,
@@ -251,7 +254,9 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
         globalStream = stream;
         socketOwn = socket;
         meetID = meetId;
+
         videoHandler = createPeerVideo;
+        addParticipant = createParticipant
 
         const ownVideo = document.getElementById("ownVideo");
         createOwnVideo(ownVideo);
@@ -267,7 +272,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
         socket.emit("getAllUsers", meetId);
         socket.on("allUsers", users => {
             users.forEach(userID => {
-                createPeer(userID[0], socket.id, stream, createPeerVideo);
+                createPeer(userID[0], userID[1], socket.id, stream, createPeerVideo);
             })
         })
     })

@@ -24,7 +24,7 @@ io.on('connection', socket => {
         }
     })
 
-    socket.on('joinMeet', (data, generateStream) => {
+    socket.on('joinMeet', (data) => {
 
         if(meetingUsers[data.meetId]){
 
