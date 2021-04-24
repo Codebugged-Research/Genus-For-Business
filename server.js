@@ -56,8 +56,9 @@ io.on('connection', socket => {
         io.to(data.for).emit("accepted", {forYou: data.acceptor});
     })
 
-    socket.on("messageResponse", (message) => {
-        console.log(message);
+    socket.on("messageResponse", (username, message, appendMessage) => {
+        appendMessage('You', message);        
+        socket.broadcast.emit("newMessage", username, message);
     })
 
     socket.on("disconnectCall", (meetID, socketID, disconnected) => {

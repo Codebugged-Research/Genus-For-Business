@@ -5,8 +5,6 @@ import {
     Holder,
     Utils,
     VideoContainer,
-    OwnVideoContainer,
-    VideoAlone,
     ContainerVideo,
     VideoHolder,
     ActionHolder,
@@ -109,12 +107,26 @@ function Conference({match, history}){
     const handleChange = (panel) => (e, newpanel) => {
         setExpanded(newpanel ? panel : 'chatpanel');
     }
+
+    const appendMessage = (sender, message) => {
+        const messageContainer = document.getElementById("messageHolder");
+
+        const newMessage = document.createElement('div');
+        newMessage.setAttribute('id', socketRef.current.id);
+        newMessage.setAttribute('class', 'newMessageHolder');
+        
+        newMessage.innerHTML = `
+            <div class="titleMessage">${sender}</div>
+            <div class="message">${message}</div>
+        `
+        messageContainer.appendChild(newMessage);
+    }
     
     const handleMessage = (e) => {
         e.preventDefault();
 
         if(message !== ""){
-            socketRef.current.emit('messageResponse', userName ,message);
+            socketRef.current.emit('messageResponse', userName ,message, appendMessage);
             setMessage("");
         }
     }

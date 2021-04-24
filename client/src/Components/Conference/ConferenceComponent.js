@@ -63,19 +63,3 @@ export const OwnVideo = styled.video`
     width: 100%;
     height: 100%;
 `
-
-export const OwnVideoContainer = styled.div`
-    display: grid;
-    place-items: center;
-
-    overflow: hidden;
-    
-    width: 100%;
-`
-
-export const VideoAlone = styled.video`
-    object-fit: fill;
-    width: 100%;
-    height: 100%;
-    border-radius: 15px;
-`
