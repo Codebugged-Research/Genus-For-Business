@@ -142,7 +142,7 @@ function Conference({match, history}){
         }
     }
 
-    const createPeerVideo = (stream, id) => {
+    const createPeerVideo = (stream, name, id) => {
 
         var newVideoHolder = document.createElement("div");
         newVideoHolder.setAttribute("id", `${id}`);
@@ -155,7 +155,12 @@ function Conference({match, history}){
         newVideo.setAttribute("playsInline", true);
         newVideo.setAttribute("autoPlay", true);
 
+        var nameHolder = document.createElement("div");
+        nameHolder.setAttribute('class', 'nameHolder');
+        nameHolder.innerText = name;
+
         newVideoHolder.appendChild(newVideo);
+        newVideoHolder.appendChild(nameHolder);
         document.getElementById("videoContainer").appendChild(newVideoHolder);
     }
 
@@ -166,7 +171,7 @@ function Conference({match, history}){
         newPart.setAttribute("id", `${peerID}`);
         newPart.setAttribute('class', 'participant');
 
-        newPart.innerText = name + new Date().toLocaleTimeString();
+        newPart.innerText = name;
         participantHolder.appendChild(newPart);
     }
 

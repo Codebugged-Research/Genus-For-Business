@@ -1,6 +1,8 @@
 .videoHolder{
   display: grid;
   place-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .videoClass{
@@ -53,4 +55,15 @@
 .participant{
   font-size: 18px;
   font-family: 'Nunito', 'serif';
+}
+
+.nameHolder{
+  display: flex;
+  align-items: flex-end;
+  position: absolute;
+  bottom: 0;
+  padding: 2px;
+  font-family: 'Nunito','serif';
+  font-size: 12px;
+  color: white;
 }

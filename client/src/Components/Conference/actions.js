@@ -137,7 +137,7 @@ const createPeer = (userToSignal, userToCallName, callerID, stream) => {
     })
 
     peer.on("stream", stream => {
-        videoHandler(stream, peer._id);
+        videoHandler(stream, userToCallName, peer._id);
         addParticipant(userToCallName, peer._id);
         containerStyleCheck();
     })
@@ -184,7 +184,7 @@ const acceptOthersCall = () => {
 
         peer.on("stream", (stream) => {
             containerStyleCheck();
-            videoHandler(stream, peer._id);
+            videoHandler(stream, payload.name, peer._id);
             addParticipant(payload.name, peer._id);
         })
 
