@@ -61,6 +61,10 @@ io.on('connection', socket => {
         socket.broadcast.emit("newMessage", username, message);
     })
 
+    socket.on("iShareScreen", (meetID, videoID) => {
+        io.to(meetID).emit("screenShared", videoID);
+    })
+
     socket.on("disconnectCall", (meetID, socketID, disconnected) => {
         if(meetingUsers[meetID]){
             meetingUsers[meetID] = meetingUsers[meetID].filter(id => id[0] !== socketID);

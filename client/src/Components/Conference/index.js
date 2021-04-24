@@ -237,6 +237,7 @@ function Conference({match, history}){
     return (
         <Container>
             <Holder>
+                <video style={{display: "none"}} autoPlay playsInline id="sharedVideo"></video>
                 <ContainerVideo id="displayAll">
                     <VideoContainer id="videoContainer">
                         <VideoHolder>

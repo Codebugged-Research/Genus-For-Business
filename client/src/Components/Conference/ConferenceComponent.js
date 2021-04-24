@@ -14,6 +14,7 @@ export const Holder = styled.div`
     grid-gap: 15px;
     height: 100%;
     width: 100%;
+    overflow: auto;
 `
 
 export const Utils = styled.div`

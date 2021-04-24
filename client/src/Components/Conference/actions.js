@@ -81,6 +81,8 @@ const handleShareScreen = (errorToast) => {
                         myPeers.forEach((peerElem) => {
                             peerElem[0].replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
                         })
+
+                        socketOwn.emit("iShareScreen", meetID, socketOwn.id);
                     }
         
                     sharedScreen.getTracks()[0].onended = () => {
@@ -91,6 +93,8 @@ const handleShareScreen = (errorToast) => {
                             myPeers.forEach((peerElem) => {
                                 peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], globalStream.getVideoTracks()[0], globalStream);
                             })
+
+                            socketOwn.emit("iEndShare", meetID, socketOwn.id);
                         }
                     }
                 })
@@ -242,6 +246,27 @@ const thisUserDisconnected = () => {
     })
 }
 
+const screenShareManipulation = () => {
+    socketOwn.on("screenShared", (videoID) => {
+        myPeers.forEach((element) => {
+            if(element[2] === videoID){
+                if(document.getElementById(`video_${element[1]}`)){
+                    const sharedVideoContainer = document.getElementById("sharedVideo")
+                    sharedVideoContainer.style.display = 'grid';
+                    document.getElementById("displayAll").style.display = 'none';
+
+                    sharedVideoContainer.style.placeSelf = 'center';
+                    sharedVideoContainer.style.width = '85%';
+                    sharedVideoContainer.style.padding = '5px';
+                    sharedVideoContainer.style.borderRadius = '15px';
+
+                    document.getElementById("sharedVideo").srcObject =  document.getElementById(`video_${element[1]}`).srcObject
+                }
+            }
+        })
+    })
+}
+
 export const actions = (name, meetId, socket, errorToast, createPeerVideo, createParticipant) => {
     navigator.mediaDevices.getUserMedia({
         video: {
@@ -261,6 +286,8 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo, creat
 
         const ownVideo = document.getElementById("ownVideo");
         createOwnVideo(ownVideo);
+
+        screenShareManipulation();
         handleShareScreen(errorToast);
 
         toggleVideoTracks();
