@@ -100,6 +100,16 @@ const handleShareScreen = (errorToast) => {
     }
 }
 
+const containerStyleCheck = () => {
+    const contain = document.getElementById("videoContainer");
+
+    if(myPeers.length > 0){
+        contain.style.gridTemplateColumns = 'repeat(auto-fit, minmax(20%, 0.75fr))';
+    } else {
+        contain.style.gridTemplateColumns = 'unset';
+    }
+}
+
 const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({
         initiator: true,
@@ -115,6 +125,7 @@ const createPeer = (userToSignal, callerID, stream) => {
     })
 
     myPeers.push([peer, peer._id, userToSignal]);
+
     if(screenShareIndicator){
         peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
     }
@@ -125,6 +136,7 @@ const createPeer = (userToSignal, callerID, stream) => {
 
     peer.on("stream", stream => {
         videoHandler(stream, peer._id);
+        containerStyleCheck();
     })
 
     peer.on('error', (err) => {
@@ -140,6 +152,7 @@ const createPeer = (userToSignal, callerID, stream) => {
 
         var l = myPeers.filter(p => p[1] !== peer._id);
         myPeers = l;
+        containerStyleCheck();
     })
 
     socketOwn.on("accepted", (data) => {
@@ -167,6 +180,7 @@ const acceptOthersCall = () => {
         })
 
         peer.on("stream", (stream) => {
+            containerStyleCheck();
             videoHandler(stream, peer._id);
         })
 
@@ -183,6 +197,7 @@ const acceptOthersCall = () => {
 
             var le = myPeers.filter(p => p[1] !== peer._id);
             myPeers = le;
+            containerStyleCheck();
         })
 
         peer.signal(payload.mySignal);

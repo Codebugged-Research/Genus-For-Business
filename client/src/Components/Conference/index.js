@@ -5,6 +5,8 @@ import {
     Holder,
     Utils,
     VideoContainer,
+    OwnVideoContainer,
+    VideoAlone,
     ContainerVideo,
     VideoHolder,
     ActionHolder,
@@ -194,7 +196,7 @@ function Conference({match, history}){
     return (
         <Container>
             <Holder>
-                <ContainerVideo>
+                <ContainerVideo id="displayAll">
                     <VideoContainer id="videoContainer">
                         <VideoHolder>
                             <OwnVideo id="ownVideo" />
@@ -260,7 +262,7 @@ function Conference({match, history}){
                     </AccordionSummary>
                     <AccordionDetails style={{height: '75vh', position:'relative'}}>
                         <div id="messageHolder">
-                            
+
                         </div>
                         <form onSubmit={handleMessage} className={classes.messageForm}>
                             <Input

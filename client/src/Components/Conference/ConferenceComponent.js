@@ -30,11 +30,9 @@ export const ContainerVideo = styled.div`
 export const VideoContainer = styled.div`
     display: grid;
     place-items: center;
-    grid-template-columns: repeat(auto-fit, minmax(20%, 0.75fr));
     grid-gap: 10px;
     width: 100%;
     height: 100%;
-    overflow: auto;
 `
 
 export const VideoHolder = styled.div`
@@ -64,4 +62,20 @@ export const OwnVideo = styled.video`
     transform: scaleX(-1);
     width: 100%;
     height: 100%;
+`
+
+export const OwnVideoContainer = styled.div`
+    display: grid;
+    place-items: center;
+
+    overflow: hidden;
+    
+    width: 100%;
+`
+
+export const VideoAlone = styled.video`
+    object-fit: fill;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
 `
