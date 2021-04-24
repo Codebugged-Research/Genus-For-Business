@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useRef} from 'react';
-import Peer from 'simple-peer';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Container,
@@ -12,10 +11,14 @@ import {
     Actions,
     OwnVideo
 } from './ConferenceComponent';
-import { MdTv, MdCallEnd } from 'react-icons/md';
+import { MdTv, MdCallEnd, MdExpandMore } from 'react-icons/md';
 import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
 import { useToast } from '@chakra-ui/react';
 import { actions } from './actions';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import Typography from '@material-ui/core/Typography';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
 
 const io = require('socket.io-client');
 
@@ -57,6 +60,18 @@ const useStyles = makeStyles((theme) => ({
         transform: 'scaleX(-1)',
         width: '100%',
         height: '100%',
+    },
+    utils:{
+        padding: '7px',
+        height: '100vh'
+    },
+    accordionStyles: {
+        backgroundColor: '#2C3E50',
+        color: 'white'
+    },
+    sectionTitle: {
+        fontFamily: 'Nunito',
+        fontSize: '18px'
     }
 }));
 
@@ -66,8 +81,13 @@ function Conference({match, history}){
     const userName = sessionStorage.getItem('userName');
     const toast = useToast();
     const toast_id = "toast-id";
- 
+
+    const [expanded, setExpanded] = useState('chatpanel');
     const socketRef = useRef();
+
+    const handleChange = (panel) => (e, newpanel) => {
+        setExpanded(newpanel ? panel : 'chatpanel');
+    }
 
     const handleConnectLink = () => {
         if(!toast.isActive(toast_id)){
@@ -193,7 +213,29 @@ function Conference({match, history}){
                     </Actions>
                 </ActionHolder>
             </Holder>
-            <Utils></Utils>
+            <Utils className={classes.utils}>
+                <Accordion expanded={expanded === 'participants'} onChange={handleChange('participants')} className={classes.accordionStyles}>
+                    <AccordionSummary
+                        expandIcon={<MdExpandMore style={{color: 'white'}} />}
+                    >
+                        <Typography className={classes.sectionTitle}>Participants</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails style={{height: '75vh'}}>
+
+                    </AccordionDetails>
+                </Accordion>
+                <Accordion expanded={expanded === 'chatpanel'} className={classes.accordionStyles} onChange={handleChange('chatpanel')}>
+                    <AccordionSummary
+                        expandIcon={<MdExpandMore style={{color: 'white'}} />}
+                        
+                    >
+                        <Typography className={classes.sectionTitle}>Chat</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails style={{height: '75vh', position:'relative'}}>
+                        
+                    </AccordionDetails>
+                </Accordion>
+            </Utils>
         </Container>
     )
 }

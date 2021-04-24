@@ -1,5 +1,4 @@
 import Peer from 'simple-peer';
-
 const wrtc = require('wrtc');
 
 var globalStream;
@@ -216,7 +215,6 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
 
         socket.emit("getAllUsers", meetId);
         socket.on("allUsers", users => {
-            const peers = [];
             users.forEach(userID => {
                 createPeer(userID[0], socket.id, stream, createPeerVideo);
             })
