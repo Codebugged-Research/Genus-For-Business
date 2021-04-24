@@ -166,7 +166,7 @@ function Conference({match, history}){
         newPart.setAttribute("id", `${peerID}`);
         newPart.setAttribute('class', 'participant');
 
-        newPart.innerText = name;
+        newPart.innerText = name + new Date().toLocaleTimeString();
         participantHolder.appendChild(newPart);
     }
 

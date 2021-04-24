@@ -126,14 +126,14 @@ const createPeer = (userToSignal, userToCallName, callerID, stream) => {
         }
     })
 
-    myPeers.push([peer, peer._id, userToSignal]);
+    myPeers.push([peer, peer._id, userToSignal, userToCallName]);
 
     if(screenShareIndicator){
         peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
     }
 
     peer.on("signal", data => {
-        socketOwn.emit("callUserGetStream", {toCall: userToSignal, sender: callerID, dataSentAlong: data})
+        socketOwn.emit("callUserGetStream", {toCall: userToSignal, sender: callerID, dataSentAlong: data, name: yourName})
     })
 
     peer.on("stream", stream => {
@@ -173,18 +173,19 @@ const acceptOthersCall = () => {
             stream: globalStream
         })
 
-        myPeers.push([peer, peer._id, payload.sender]);
+        myPeers.push([peer, peer._id, payload.sender, payload.name]);
         if(screenShareIndicator){
             peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
         }
 
         peer.on("signal", data => {
-            socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender})
+            socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender, name: yourName})
         })
 
         peer.on("stream", (stream) => {
             containerStyleCheck();
             videoHandler(stream, peer._id);
+            addParticipant(payload.name, peer._id);
         })
 
         peer.on('error', (err) => {
