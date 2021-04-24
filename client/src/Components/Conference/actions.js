@@ -66,33 +66,37 @@ const toggleAudioTracks = () => {
 const handleShareScreen = (errorToast) => { 
     const shareBtn = document.getElementById("shareBtn");
 
-    if(!screenShareIndicator){
-        navigator.mediaDevices.getDisplayMedia({cursor: true})
-        .then((sharedScreen) => {
-
-            screenShareIndicator = true;
-            sharedStream = sharedScreen;
-            shareBtn.disabled = true;
-
-            if(peers.length !== 0){
-                peers.forEach((peerElem) => {
-                    peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
+    if(shareBtn){
+        shareBtn.addEventListener("click", () => {
+            if(!screenShareIndicator){
+                navigator.mediaDevices.getDisplayMedia({cursor: true})
+                .then((sharedScreen) => {
+        
+                    screenShareIndicator = true;
+                    sharedStream = sharedScreen;
+                    shareBtn.disabled = true;
+        
+                    if(myPeers.length !== 0){
+                        myPeers.forEach((peerElem) => {
+                            peerElem[0].replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
+                        })
+                    }
+        
+                    sharedScreen.getTracks()[0].onended = () => {
+                        screenShareIndicator = false;
+                        shareBtn.disabled = false;
+        
+                        if(myPeers.length !== 0){
+                            myPeers.forEach((peerElem) => {
+                                peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], globalStream.getVideoTracks()[0], globalStream);
+                            })
+                        }
+                    }
+                })
+                .catch((err) => {
+                    errorToast("shareError");
                 })
             }
-
-            sharedScreen.getTracks()[0].onended = () => {
-                screenShareIndicator = false;
-                shareBtn.disabled = false;
-
-                if(peers.length !== 0){
-                    peers.forEach((peerElem) => {
-                        peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], ownVideo.current.srcObject.getVideoTracks()[0], ownVideo.current.srcObject);
-                    })
-                }
-            }
-        })
-        .catch((err) => {
-            errorToast("shareError");
         })
     }
 }
@@ -111,7 +115,7 @@ const createPeer = (userToSignal, callerID, stream) => {
         }
     })
 
-    peers.push([peer, peer._id, userToSignal]);
+    myPeers.push([peer, peer._id, userToSignal]);
     if(screenShareIndicator){
         peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
     }
