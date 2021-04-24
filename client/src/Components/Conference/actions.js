@@ -63,39 +63,39 @@ const toggleAudioTracks = () => {
     }
 }
 
-// const handleShareScreen = () => { 
-//     const shareBtn = document.getElementById("shareBtn");
+const handleShareScreen = (errorToast) => { 
+    const shareBtn = document.getElementById("shareBtn");
 
-//     if(!screenShareIndicator){
-//         navigator.mediaDevices.getDisplayMedia({cursor: true})
-//         .then((sharedScreen) => {
+    if(!screenShareIndicator){
+        navigator.mediaDevices.getDisplayMedia({cursor: true})
+        .then((sharedScreen) => {
 
-//             screenShareIndicator = true;
-//             sharedStream = sharedScreen;
-//             shareBtn.disabled = true;
+            screenShareIndicator = true;
+            sharedStream = sharedScreen;
+            shareBtn.disabled = true;
 
-//             if(peers.length !== 0){
-//                 peers.forEach((peerElem) => {
-//                     peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
-//                 })
-//             }
+            if(peers.length !== 0){
+                peers.forEach((peerElem) => {
+                    peerElem[0].replaceTrack(ownVideo.current.srcObject.getVideoTracks()[0], sharedStream.getVideoTracks()[0], ownVideo.current.srcObject);
+                })
+            }
 
-//             sharedScreen.getTracks()[0].onended = () => {
-//                 screenShareIndicator = false;
-//                 shareBtn.disabled = false;
+            sharedScreen.getTracks()[0].onended = () => {
+                screenShareIndicator = false;
+                shareBtn.disabled = false;
 
-//                 if(peers.length !== 0){
-//                     peers.forEach((peerElem) => {
-//                         peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], ownVideo.current.srcObject.getVideoTracks()[0], ownVideo.current.srcObject);
-//                     })
-//                 }
-//             }
-//         })
-//         .catch((err) => {
-//             errorToast("shareError");
-//         })
-//     }
-// }
+                if(peers.length !== 0){
+                    peers.forEach((peerElem) => {
+                        peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], ownVideo.current.srcObject.getVideoTracks()[0], ownVideo.current.srcObject);
+                    })
+                }
+            }
+        })
+        .catch((err) => {
+            errorToast("shareError");
+        })
+    }
+}
 
 const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({
@@ -110,6 +110,11 @@ const createPeer = (userToSignal, callerID, stream) => {
             ]
         }
     })
+
+    peers.push([peer, peer._id, userToSignal]);
+    if(screenShareIndicator){
+        peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
+    }
 
     peer.on("signal", data => {
         socketOwn.emit("callUserGetStream", {toCall: userToSignal, sender: callerID, dataSentAlong: data})
@@ -137,8 +142,6 @@ const createPeer = (userToSignal, callerID, stream) => {
     socketOwn.on("accepted", (data) => {
         peer.signal(data.forYou);
     })
-
-    return peer;
 }
 
 const acceptOthersCall = () => {
@@ -152,6 +155,9 @@ const acceptOthersCall = () => {
         })
 
         myPeers.push([peer, peer._id, payload.sender]);
+        if(screenShareIndicator){
+            peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
+        }
 
         peer.on("signal", data => {
             socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender})
@@ -197,7 +203,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
 
         const ownVideo = document.getElementById("ownVideo");
         createOwnVideo(ownVideo);
-        // handleShareScreen();
+        handleShareScreen(errorToast);
 
         toggleVideoTracks();
         toggleAudioTracks();
@@ -208,10 +214,8 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo) => {
         socket.on("allUsers", users => {
             const peers = [];
             users.forEach(userID => {
-                const peer = createPeer(userID[0], socket.id, stream, createPeerVideo);
-                peers.push([peer, peer._id ,userID[0]]);
+                createPeer(userID[0], socket.id, stream, createPeerVideo);
             })
-            myPeers = peers;
         })
     })
     .catch((err) => {
