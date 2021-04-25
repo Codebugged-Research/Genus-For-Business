@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import image from '../../images/codebugged.png';
 
 export const Container = styled.div`
     display: grid;

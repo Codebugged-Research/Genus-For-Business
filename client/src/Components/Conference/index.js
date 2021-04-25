@@ -65,11 +65,14 @@ const useStyles = makeStyles((theme) => ({
     },
     utils:{
         padding: '7px',
-        height: '100vh'
+        height: '100vh',
+        display: 'grid',
+        placeItems:'center'
     },
     accordionStyles: {
         backgroundColor: '#2C3E50',
-        color: 'white'
+        color: 'white',
+        width: '100%'
     },
     sectionTitle: {
         fontFamily: 'Nunito',
@@ -283,13 +286,20 @@ function Conference({match, history}){
                 </ActionHolder>
             </Holder>
             <Utils className={classes.utils}>
+                <Accordion className={classes.accordionStyles} >
+                    <AccordionSummary>
+                        <Typography className={classes.sectionTitle}>
+                            Codebugged AI
+                        </Typography>
+                    </AccordionSummary>
+                </Accordion>
                 <Accordion expanded={expanded === 'participants'} onChange={handleChange('participants')} className={classes.accordionStyles}>
                     <AccordionSummary
                         expandIcon={<MdExpandMore style={{color: 'white'}} />}
                     >
                         <Typography className={classes.sectionTitle}>Participants</Typography>
                     </AccordionSummary>
-                    <AccordionDetails style={{height: '75vh'}}>
+                    <AccordionDetails style={{height: '66vh'}}>
                         <div id="partList"></div>
                     </AccordionDetails>
                 </Accordion>
@@ -299,7 +309,7 @@ function Conference({match, history}){
                     >
                         <Typography className={classes.sectionTitle}>Chat</Typography>
                     </AccordionSummary>
-                    <AccordionDetails style={{height: '75vh', position:'relative'}}>
+                    <AccordionDetails style={{height: '66vh', position:'relative'}}>
                         <div id="messageHolder" className="messages">
                         </div>
                         <form onSubmit={handleMessage} className={classes.messageForm}>
