@@ -83,6 +83,7 @@ const handleShareScreen = (errorToast) => {
                         })
 
                         socketOwn.emit("iShareScreen", meetID, socketOwn.id);
+
                     }
         
                     sharedScreen.getTracks()[0].onended = () => {
@@ -115,6 +116,29 @@ const containerStyleCheck = () => {
         contain.style.gridTemplateColumns = 'unset';
     }
 }
+ 
+const screenShareStyles = (id, type) => {
+    const videoShareHolder = document.getElementById("sharedVideo");
+    const otherVideo = document.getElementById("displayAll");
+
+    if(type === "start"){
+        otherVideo.style.display = 'none';
+        videoShareHolder.style.display = 'grid';
+
+        videoShareHolder.style.placeSelf = 'center';
+        videoShareHolder.style.width = '85%';
+        videoShareHolder.style.padding = '5px';
+        videoShareHolder.style.borderRadius = '15px';
+
+        videoShareHolder.srcObject = document.getElementById(`video_${id}`).srcObject;
+    } else if(type === "end"){
+        otherVideo.style.display = 'grid';
+        videoShareHolder.style.display = 'none';
+
+        videoShareHolder.srcObject = null;
+    }
+}
+
 
 const createPeer = (userToSignal, userToCallName, callerID, stream) => {
     const peer = new Peer({
@@ -251,16 +275,17 @@ const screenShareManipulation = () => {
         myPeers.forEach((element) => {
             if(element[2] === videoID){
                 if(document.getElementById(`video_${element[1]}`)){
-                    const sharedVideoContainer = document.getElementById("sharedVideo")
-                    sharedVideoContainer.style.display = 'grid';
-                    document.getElementById("displayAll").style.display = 'none';
+                    screenShareStyles(element[1], "start");
+                }
+            }
+        })
+    })
 
-                    sharedVideoContainer.style.placeSelf = 'center';
-                    sharedVideoContainer.style.width = '85%';
-                    sharedVideoContainer.style.padding = '5px';
-                    sharedVideoContainer.style.borderRadius = '15px';
-
-                    document.getElementById("sharedVideo").srcObject =  document.getElementById(`video_${element[1]}`).srcObject
+    socketOwn.on("endScreenShare", (videoID) => {
+        myPeers.forEach((element) => {
+            if(element[2] === videoID){
+                if(document.getElementById(`video_${element[1]}`)){
+                    screenShareStyles(element[1], "end");
                 }
             }
         })
