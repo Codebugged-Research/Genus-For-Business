@@ -15,6 +15,14 @@ var addParticipant;
 
 var myPeers = [];
 
+window.onload = function(){
+    if(sessionStorage.getItem('reloading')){
+        if(document.getElementById("disconnectCall")){
+            document.getElementById("disconnectCall").click();
+        }
+    }
+}
+
 const createOwnVideo = (container) => {
     container.srcObject = globalStream;
     container.muted = true;
@@ -192,8 +200,8 @@ const createPeer = (userToSignal, userToCallName, callerID, stream) => {
                 }
             }
         })
-        peer.destroy(err);
         document.getElementById("partList").removeChild(document.getElementById(peer._id));
+        peer.destroy(err);
 
         var l = myPeers.filter(p => p[1] !== peer._id);
         myPeers = l;
@@ -239,9 +247,8 @@ const acceptOthersCall = () => {
                     }
                 }
             })
-            peer.destroy(err);
-
             document.getElementById("partList").removeChild(document.getElementById(peer._id));
+            peer.destroy(err);
 
             var le = myPeers.filter(p => p[1] !== peer._id);
             myPeers = le;
@@ -277,8 +284,8 @@ const thisUserDisconnected = () => {
                     vC1.removeChild(document.getElementById(`peer_${peer[1]}`));
                 }
             }
-            peer[0].destroy();
             document.getElementById("partList").removeChild(document.getElementById(peer[0]._id));
+            peer[0].destroy();
         })
 
         var lee = myPeers.filter(p => p[2] !== userID);
@@ -322,6 +329,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo, creat
         audio: true
     })
     .then((stream) => {
+
         yourName = name;
         globalStream = stream;
         socketOwn = socket;

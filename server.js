@@ -35,7 +35,6 @@ io.on('connection', socket => {
             })
             socket.join(data.meetId);
             meetingUsers[data.meetId].push([socket.id, data.name]);
-
         } else {
             meetingUsers[data.meetId] = [[socket.id, data.name]];
             socket.join(data.meetId);

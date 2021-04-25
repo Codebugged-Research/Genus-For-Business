@@ -145,7 +145,7 @@ function Conference({match, history}){
     const createPeerVideo = (stream, name, id) => {
 
         var newVideoHolder = document.createElement("div");
-        newVideoHolder.setAttribute("id", `_peer_${id}`);
+        newVideoHolder.setAttribute("id", `peer_${id}`);
         newVideoHolder.setAttribute("class", "videoHolder");
 
         var newVideo = document.createElement("video");
@@ -204,6 +204,7 @@ function Conference({match, history}){
 
     useEffect(() => {
         socketRef.current = io("http://localhost:3001/");
+        sessionStorage.setItem('reloading', true);
 
         socketRef.current.on("intializeStream", () => {
             actions(userName, match.params.meetId, socketRef.current, errorToast, createPeerVideo, createParticipant);
@@ -276,7 +277,7 @@ function Conference({match, history}){
                             <MdTv className={classes.iconStyle} id="shareBtn" />
                         </div>
                         <div className={classes.iconHolder}>
-                            <MdCallEnd className={classes.iconStyle} id="disconnectCall" />
+                            <MdCallEnd className={classes.iconStyle} style={{color:'#FF474C'}} id="disconnectCall" />
                         </div>
                     </Actions>
                 </ActionHolder>
