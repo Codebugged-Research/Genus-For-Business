@@ -8,6 +8,7 @@ var yourName;
 
 var screenShareIndicator = false;
 var otherScreenShare = false;
+var otherShareBefore = false;
 var sharedStream;
 
 var videoHandler;
@@ -17,9 +18,8 @@ var myPeers = [];
 
 window.onload = function(){
     if(sessionStorage.getItem('reloading')){
-        if(document.getElementById("disconnectCall")){
-            document.getElementById("disconnectCall").click();
-        }
+        sessionStorage.removeItem('reloading');
+        window.location.href = "http://localhost:3000";
     }
 }
 
@@ -116,6 +116,19 @@ const handleShareScreen = (errorToast) => {
     }
 }
 
+const alreadySharingHandle = () => {
+    socketOwn.on("alreadySharing", (id) => {
+        
+        myPeers.forEach((element) => {
+            if(element[2] === id){
+                if(document.getElementById(`video_${element[1]}`)){
+                    screenShareStyles(element[1], "start");
+                }
+            }
+        })
+    })
+}
+
 const containerStyleCheck = () => {
     const contain = document.getElementById("videoContainer");
 
@@ -182,12 +195,13 @@ const createPeer = (userToSignal, userToCallName, callerID, stream) => {
     }
 
     peer.on("signal", data => {
-        socketOwn.emit("callUserGetStream", {toCall: userToSignal, sender: callerID, dataSentAlong: data, name: yourName})
+        socketOwn.emit("callUserGetStream", {toCall: userToSignal, sender: callerID, dataSentAlong: data, name: yourName});
     })
 
     peer.on("stream", stream => {
         videoHandler(stream, userToCallName, peer._id);
         addParticipant(userToCallName, peer._id);
+        screenShareStyles(peer._id, "start");
         containerStyleCheck();
     })
 
@@ -229,7 +243,7 @@ const acceptOthersCall = () => {
         }
 
         peer.on("signal", data => {
-            socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender, name: yourName})
+            socketOwn.emit("handshakeAccepted", {acceptor: data, for: payload.sender, name: yourName});
         })
 
         peer.on("stream", (stream) => {
@@ -324,7 +338,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo, creat
     navigator.mediaDevices.getUserMedia({
         video: {
             width: 300,
-            height: 200
+            height: 250
         },
         audio: true
     })
@@ -343,6 +357,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo, creat
 
         screenShareManipulation();
         handleShareScreen(errorToast);
+        alreadySharingHandle();
 
         toggleVideoTracks();
         toggleAudioTracks();

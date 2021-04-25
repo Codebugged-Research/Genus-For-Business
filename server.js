@@ -13,6 +13,7 @@ const io = require("socket.io")(server, {
 })
 
 const meetingUsers = {};
+const shareScreenMeeting = {};
 
 io.on('connection', socket => {
 
@@ -45,6 +46,10 @@ io.on('connection', socket => {
     socket.on("getAllUsers", (meetId) => {
         const usersHere = meetingUsers[meetId].filter(id => id[0] !== socket.id); 
         socket.emit("allUsers", usersHere);
+        if(shareScreenMeeting[meetId]){
+            socket.emit("screenSharer", shareScreenMeeting[meetId]);
+        }
+        console.log(shareScreenMeeting[meetId]);
     })
 
     socket.on("callUserGetStream", (data) => {
@@ -61,11 +66,21 @@ io.on('connection', socket => {
     })
 
     socket.on("iShareScreen", (meetID, videoID) => {
+        if(!shareScreenMeeting[meetID]){
+            shareScreenMeeting[meetID] = [videoID];
+        }
         io.to(meetID).emit("screenShared", videoID);
     })
 
-    socket.on("iEndShare", (meetID, videoID) => {        
+    socket.on("iEndShare", (meetID, videoID) => {
+        if(shareScreenMeeting[meetID]){
+            delete shareScreenMeeting[meetID];
+        }      
         io.to(meetID).emit("endScreenShare", videoID);
+    })
+
+    socket.on("screenSharedAlready", (peerID, toSignalID) => {
+        io.to(toSignalID).emit("alreadySharing", peerID);
     })
 
     socket.on("disconnectCall", (meetID, socketID, disconnected) => {
