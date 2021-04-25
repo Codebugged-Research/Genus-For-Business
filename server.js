@@ -49,7 +49,6 @@ io.on('connection', socket => {
         if(shareScreenMeeting[meetId]){
             socket.emit("screenSharer", shareScreenMeeting[meetId]);
         }
-        console.log(shareScreenMeeting[meetId]);
     })
 
     socket.on("callUserGetStream", (data) => {

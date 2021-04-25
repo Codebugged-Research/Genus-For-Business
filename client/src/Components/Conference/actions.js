@@ -118,7 +118,7 @@ const handleShareScreen = (errorToast) => {
 
 const alreadySharingHandle = () => {
     socketOwn.on("alreadySharing", (id) => {
-        
+
         myPeers.forEach((element) => {
             if(element[2] === id){
                 if(document.getElementById(`video_${element[1]}`)){
@@ -193,6 +193,9 @@ const createPeer = (userToSignal, userToCallName, callerID, stream) => {
     if(screenShareIndicator){
         peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
     }
+    if(userToSignal === otherShareBefore){
+        screenShareStyles(peer._id, "start");
+    }
 
     peer.on("signal", data => {
         socketOwn.emit("callUserGetStream", {toCall: userToSignal, sender: callerID, dataSentAlong: data, name: yourName});
@@ -238,6 +241,7 @@ const acceptOthersCall = () => {
         })
 
         myPeers.push([peer, peer._id, payload.sender, payload.name]);
+
         if(screenShareIndicator){
             peer.replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
         }
@@ -251,6 +255,8 @@ const acceptOthersCall = () => {
             videoHandler(stream, payload.name, peer._id);
             addParticipant(payload.name, peer._id);
         })
+
+
 
         peer.on('error', (err) => {
             myPeers.forEach((peers) => {
@@ -324,6 +330,7 @@ const screenShareManipulation = () => {
     socketOwn.on("endScreenShare", (videoID) => {
 
         otherScreenShare = false;
+        otherShareBefore = false;
         myPeers.forEach((element) => {
             if(element[2] === videoID){
                 if(document.getElementById(`video_${element[1]}`)){
@@ -331,6 +338,10 @@ const screenShareManipulation = () => {
                 }
             }
         })
+    })
+
+    socketOwn.on("screenSharer", (videoID) => {
+        otherShareBefore = videoID;
     })
 }
 
@@ -350,7 +361,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo, creat
         meetID = meetId;
 
         videoHandler = createPeerVideo;
-        addParticipant = createParticipant
+        addParticipant = createParticipant;
 
         const ownVideo = document.getElementById("ownVideo");
         createOwnVideo(ownVideo);
