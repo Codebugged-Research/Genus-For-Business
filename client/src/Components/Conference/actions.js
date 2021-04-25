@@ -7,6 +7,7 @@ var meetID;
 var yourName;
 
 var screenShareIndicator = false;
+var otherScreenShare = false;
 var sharedStream;
 
 var videoHandler;
@@ -69,33 +70,33 @@ const handleShareScreen = (errorToast) => {
 
     if(shareBtn){
         shareBtn.addEventListener("click", () => {
-            if(!screenShareIndicator){
+            if(!screenShareIndicator && !otherScreenShare){
                 navigator.mediaDevices.getDisplayMedia({cursor: true})
                 .then((sharedScreen) => {
         
                     screenShareIndicator = true;
                     sharedStream = sharedScreen;
-                    shareBtn.disabled = true;
-        
+                    shareBtn.disabled = true;                    
+
+                    screenShareStyles("", "ownStart");
+                    socketOwn.emit("iShareScreen", meetID, socketOwn.id);
+
                     if(myPeers.length !== 0){
                         myPeers.forEach((peerElem) => {
                             peerElem[0].replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
                         })
-
-                        socketOwn.emit("iShareScreen", meetID, socketOwn.id);
-
                     }
         
                     sharedScreen.getTracks()[0].onended = () => {
                         screenShareIndicator = false;
                         shareBtn.disabled = false;
-        
+                        screenShareStyles("", "end");
+                        
+                        socketOwn.emit("iEndShare", meetID, socketOwn.id);
                         if(myPeers.length !== 0){
                             myPeers.forEach((peerElem) => {
                                 peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], globalStream.getVideoTracks()[0], globalStream);
                             })
-
-                            socketOwn.emit("iEndShare", meetID, socketOwn.id);
                         }
                     }
                 })
@@ -125,6 +126,7 @@ const screenShareStyles = (id, type) => {
         otherVideo.style.display = 'none';
         videoShareHolder.style.display = 'grid';
 
+        videoShareHolder.muted = false;
         videoShareHolder.style.placeSelf = 'center';
         videoShareHolder.style.width = '85%';
         videoShareHolder.style.padding = '5px';
@@ -136,7 +138,18 @@ const screenShareStyles = (id, type) => {
         videoShareHolder.style.display = 'none';
 
         videoShareHolder.srcObject = null;
-    }
+    } else if(type === "ownStart") {
+        otherVideo.style.display = 'none';
+        videoShareHolder.style.display = 'grid';
+
+        videoShareHolder.style.placeSelf = 'center';
+        videoShareHolder.style.width = '85%';
+        videoShareHolder.style.padding = '5px';
+        videoShareHolder.style.borderRadius = '15px';
+
+        videoShareHolder.srcObject = sharedStream;
+        videoShareHolder.muted = true;
+    } else {}
 }
 
 
@@ -272,6 +285,8 @@ const thisUserDisconnected = () => {
 
 const screenShareManipulation = () => {
     socketOwn.on("screenShared", (videoID) => {
+
+        otherScreenShare = true;
         myPeers.forEach((element) => {
             if(element[2] === videoID){
                 if(document.getElementById(`video_${element[1]}`)){
@@ -282,6 +297,8 @@ const screenShareManipulation = () => {
     })
 
     socketOwn.on("endScreenShare", (videoID) => {
+
+        otherScreenShare = false;
         myPeers.forEach((element) => {
             if(element[2] === videoID){
                 if(document.getElementById(`video_${element[1]}`)){
