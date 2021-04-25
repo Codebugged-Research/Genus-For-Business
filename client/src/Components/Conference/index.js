@@ -145,7 +145,7 @@ function Conference({match, history}){
     const createPeerVideo = (stream, name, id) => {
 
         var newVideoHolder = document.createElement("div");
-        newVideoHolder.setAttribute("id", `${id}`);
+        newVideoHolder.setAttribute("id", `_peer_${id}`);
         newVideoHolder.setAttribute("class", "videoHolder");
 
         var newVideo = document.createElement("video");

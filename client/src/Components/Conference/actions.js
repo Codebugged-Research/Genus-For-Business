@@ -188,11 +188,12 @@ const createPeer = (userToSignal, userToCallName, callerID, stream) => {
             if(peers[1] === peer._id){
                 const vC = document.getElementById("videoContainer");
                 if(document.getElementById(peers[1])){
-                    vC.removeChild(document.getElementById(peers[1]));
+                    vC.removeChild(document.getElementById(`peer_${peers[1]}`));
                 }
             }
         })
         peer.destroy(err);
+        document.getElementById("partList").removeChild(document.getElementById(peer._id));
 
         var l = myPeers.filter(p => p[1] !== peer._id);
         myPeers = l;
@@ -234,11 +235,13 @@ const acceptOthersCall = () => {
                 if(peers[1] === peer._id){
                     const vCo = document.getElementById("videoContainer");
                     if(document.getElementById(peers[1])){
-                        vCo.removeChild(document.getElementById(peers[1]));
+                        vCo.removeChild(document.getElementById(`peer_${peers[1]}`));
                     }
                 }
             })
             peer.destroy(err);
+
+            document.getElementById("partList").removeChild(document.getElementById(peer._id));
 
             var le = myPeers.filter(p => p[1] !== peer._id);
             myPeers = le;
@@ -271,10 +274,11 @@ const thisUserDisconnected = () => {
             if(peer[2] === userID){
                 const vC1 = document.getElementById("videoContainer");
                 if(document.getElementById(peer[1])){
-                    vC1.removeChild(document.getElementById(peer[1]));
+                    vC1.removeChild(document.getElementById(`peer_${peer[1]}`));
                 }
             }
             peer[0].destroy();
+            document.getElementById("partList").removeChild(document.getElementById(peer[0]._id));
         })
 
         var lee = myPeers.filter(p => p[2] !== userID);
