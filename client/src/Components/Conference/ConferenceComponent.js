@@ -39,9 +39,6 @@ export const VideoContainer = styled.div`
 export const VideoHolder = styled.div`
     display: grid;
     place-items: center;
-    box-shadow:
-    0 2.8px 2.2px rgba(200, 200, 200, 0.1),
-    0 6.7px 5.3px rgba(200, 200, 200, 0.2);
 `
 
 export const ActionHolder = styled.div`

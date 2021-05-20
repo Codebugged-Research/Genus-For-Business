@@ -79,11 +79,11 @@ const handleShareScreen = (errorToast) => {
 
     if(shareBtn){
         shareBtn.addEventListener("click", () => {
-            if(!otherScreenShare){
-                if(!screenShareIndicator){
+                if(!otherScreenShare && !screenShareIndicator){
                     navigator.mediaDevices.getDisplayMedia({cursor: true})
                     .then((sharedScreen) => {
                         screenShareIndicator = true;
+                        //otherScreenShare = true;
                         sharedStream = sharedScreen;
                         shareBtn.disabled = true;                    
 
@@ -106,6 +106,7 @@ const handleShareScreen = (errorToast) => {
                 {
                 //sharedStream.getTracks()[0].onended = () => {
                     screenShareIndicator = false;
+                    otherScreenShare = false;
                     shareBtn.disabled = false;
                     screenShareStyles("", "end");
                     
@@ -119,7 +120,6 @@ const handleShareScreen = (errorToast) => {
                     }
                 //}
                 }  
-            }
         })
     }
 }
@@ -227,7 +227,8 @@ const screenShareStyles = (id, type) => {
         document.getElementById("menuSidebarOn").style.display = 'none';
 
         videoShareHolder.srcObject = null;
-    } else if(type === "ownStart") {
+    } 
+    else if(type === "ownStart") {
         otherVideo.style.display = 'none';
         videoShareHolder.style.display = 'grid';
         document.getElementById("menuSidebarOn").style.display = 'inline';
@@ -239,7 +240,8 @@ const screenShareStyles = (id, type) => {
 
         videoShareHolder.srcObject = sharedStream;
         videoShareHolder.muted = true;
-    } else {}
+    } 
+    else {}
 }
 
 
@@ -386,7 +388,7 @@ const thisUserDisconnected = () => {
 const screenShareManipulation = () => {
     socketOwn.on("screenShared", (videoID) => {
 
-       //otherScreenShare = true;
+       otherScreenShare = true;
         myPeers.forEach((element) => {
             if(element[2] === videoID){
                 if(document.getElementById(`video_${element[1]}`)){

@@ -13,7 +13,7 @@ import {
     ParticipantVideo
 } from './ConferenceComponent';
 import { MdTv, MdCallEnd, MdExpandMore, MdSend } from 'react-icons/md';
-import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle, BiWindowClose, BiMenu ,BiX} from 'react-icons/bi';
+import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle, BiWindowClose, BiMenu ,BiX, BiMerge} from 'react-icons/bi';
 import { useToast } from '@chakra-ui/react';
 import { actions } from './actions';
 import Accordion from '@material-ui/core/Accordion';
@@ -116,8 +116,6 @@ function Conference({match, history}){
     const [expanded, setExpanded] = useState('chatpanel');
     const [message, setMessage] = useState("");
 
-    const [sidebar,setshowsidebar] = useState(true);
-    const [isscreenShared, setisscreenShared] = useState(false);
     const socketRef = useRef();
 
     const handleChange = (panel) => (e, newpanel) => {
@@ -146,14 +144,20 @@ function Conference({match, history}){
         }
     }
 
+    const copyToClipboard = (linkToCopy) => {
+        navigator.clipboard.writeText(linkToCopy);
+    }
+
     const handleConnectLink = () => {
         if(!toast.isActive(toast_id)){
             toast({
                 id: toast_id,
-                title: "Share Meeting Link",
+                title: "Share Meeting Link (Click For Copy)",
                 description: `http://localhost:3000/join/${match.params.meetId}`,
                 duration: 3000,
-                position: "top-right"
+                position: "top-right",
+                cursor:"pointer",
+                onClick:copyToClipboard(`http://localhost:3000/join/${match.params.meetId}`)
             })
         }
     }
