@@ -7,6 +7,7 @@ var meetID;
 var yourName;
 
 var screenShareIndicator = false;
+var sidebarShowIndicator = false;
 var otherScreenShare = false;
 var otherShareBefore = false;
 var sharedStream;
@@ -45,7 +46,7 @@ const toggleVideoTracks = () => {
                 document.getElementById("videoOff").style.display = "flex";
             } else {
                 globalStream.getVideoTracks()[0].enabled = true;
-        
+
                 document.getElementById("videoOff").style.display = "none";
                 document.getElementById("videoOn").style.display = "flex";
             }
@@ -78,40 +79,47 @@ const handleShareScreen = (errorToast) => {
 
     if(shareBtn){
         shareBtn.addEventListener("click", () => {
-            if(!screenShareIndicator && !otherScreenShare){
-                navigator.mediaDevices.getDisplayMedia({cursor: true})
-                .then((sharedScreen) => {
-        
-                    screenShareIndicator = true;
-                    sharedStream = sharedScreen;
-                    shareBtn.disabled = true;                    
+                if(!otherScreenShare && !screenShareIndicator){
+                    navigator.mediaDevices.getDisplayMedia({cursor: true})
+                    .then((sharedScreen) => {
+                        screenShareIndicator = true;
+                        //otherScreenShare = true;
+                        sharedStream = sharedScreen;
+                        shareBtn.disabled = true;                    
 
-                    screenShareStyles("", "ownStart");
-                    socketOwn.emit("iShareScreen", meetID, socketOwn.id);
-
-                    if(myPeers.length !== 0){
-                        myPeers.forEach((peerElem) => {
-                            peerElem[0].replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
-                        })
-                    }
-        
-                    sharedScreen.getTracks()[0].onended = () => {
-                        screenShareIndicator = false;
-                        shareBtn.disabled = false;
-                        screenShareStyles("", "end");
+                        screenShareStyles("", "ownStart");
+                        socketOwn.emit("iShareScreen", meetID, socketOwn.id);
+                        document.getElementById("shareScreen").style.display = "none";
+                        document.getElementById("stopScreen").style.display = "flex";
                         
-                        socketOwn.emit("iEndShare", meetID, socketOwn.id);
                         if(myPeers.length !== 0){
                             myPeers.forEach((peerElem) => {
-                                peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], globalStream.getVideoTracks()[0], globalStream);
+                                peerElem[0].replaceTrack(globalStream.getVideoTracks()[0], sharedStream.getVideoTracks()[0], globalStream);
                             })
                         }
+                    })
+                    .catch((err) => {
+                        errorToast("shareError");
+                    })
+                }
+                else if(screenShareIndicator)
+                {
+                //sharedStream.getTracks()[0].onended = () => {
+                    screenShareIndicator = false;
+                    otherScreenShare = false;
+                    shareBtn.disabled = false;
+                    screenShareStyles("", "end");
+                    
+                    socketOwn.emit("iEndShare", meetID, socketOwn.id);
+                    document.getElementById("shareScreen").style.display = "flex";
+                    document.getElementById("stopScreen").style.display = "none";
+                    if(myPeers.length !== 0){
+                        myPeers.forEach((peerElem) => {
+                            peerElem[0].replaceTrack(sharedStream.getVideoTracks()[0], globalStream.getVideoTracks()[0], globalStream);
+                        })
                     }
-                })
-                .catch((err) => {
-                    errorToast("shareError");
-                })
-            }
+                //}
+                }  
         })
     }
 }
@@ -138,7 +146,60 @@ const containerStyleCheck = () => {
         contain.style.gridTemplateColumns = 'unset';
     }
 }
- 
+
+const getNumber = (len) => {
+    var min = 0,max = len,random;
+
+    do {
+        random = Math.floor(Math.random() * (max - min)) + min;
+    } while (random === getNumber.last);
+    getNumber.last = random;
+    return random;
+};
+
+const addVideotoSidebar = () => {
+    const menuSidebarOn = document.getElementById("menuSidebarOn");
+    const menuSidebarOff = document.getElementById("menuSidebarOff");
+    if(menuSidebarOn){
+        menuSidebarOn.addEventListener("click", () => {
+            if(!sidebarShowIndicator){
+                document.getElementById("removeparticipant").style.display = "none";
+                document.getElementById("removechat").style.display = "none";
+                document.getElementById("menuSidebarOn").style.display = "none";
+                document.getElementById("menuSidebarOff").style.display = "inline";
+                document.getElementById('mainLogo').style.position = 'fixed';
+                document.getElementById('mainLogo').style.top = '7px';
+                document.getElementById('videoContainer').style["grid-template-columns"] = "1fr";
+                const sideVideo = document.getElementById("videoContainer");
+
+                var children = document.getElementById('videoContainer').children;
+                var toatlParticipant = children.length;
+                if(toatlParticipant > 2){
+                    var randonValue = getNumber(toatlParticipant);
+                    document.getElementById("particpantVideo").appendChild(children[randonValue]);
+                    randonValue = getNumber(toatlParticipant);
+                    document.getElementById("particpantVideo").appendChild(children[randonValue]);
+                }else{
+                    document.getElementById("particpantVideo").appendChild(sideVideo);
+                }
+                document.getElementById("particpantVideo").style.display = "flex";
+                sidebarShowIndicator = true;
+            }
+        })
+    }
+    if(menuSidebarOff){
+        menuSidebarOff.addEventListener("click", () => {
+            sidebarShowIndicator = false;
+            document.getElementById("particpantVideo").style.display = "none";
+            document.getElementById("removeparticipant").style.display = "block";
+            document.getElementById("removechat").style.display = "block";
+            document.getElementById("menuSidebarOn").style.display = "inline";
+            document.getElementById("menuSidebarOff").style.display = "none";
+            document.getElementById('mainLogo').style.position = 'relative';
+            document.getElementById('videoContainer').style["grid-template-columns"] = "repeat(auto-fit, minmax(20%, 0.75fr))";
+        })
+    }
+}
 const screenShareStyles = (id, type) => {
     const videoShareHolder = document.getElementById("sharedVideo");
     const otherVideo = document.getElementById("displayAll");
@@ -146,6 +207,7 @@ const screenShareStyles = (id, type) => {
     if(type === "start"){
         otherVideo.style.display = 'none';
         videoShareHolder.style.display = 'grid';
+        document.getElementById("menuSidebarOn").style.display = 'inline';
 
         videoShareHolder.muted = false;
         videoShareHolder.style.placeSelf = 'center';
@@ -155,13 +217,21 @@ const screenShareStyles = (id, type) => {
 
         videoShareHolder.srcObject = document.getElementById(`video_${id}`).srcObject;
     } else if(type === "end"){
+       // otherVideo.appendChild(document.getElementById('videoContainer'));
         otherVideo.style.display = 'grid';
+        var children = document.getElementById('particpantVideo').children;
+        for(var i=0;i<children.length;i++){
+            otherVideo.appendChild(children[i]);
+        }
         videoShareHolder.style.display = 'none';
+        document.getElementById("menuSidebarOn").style.display = 'none';
 
         videoShareHolder.srcObject = null;
-    } else if(type === "ownStart") {
+    } 
+    else if(type === "ownStart") {
         otherVideo.style.display = 'none';
         videoShareHolder.style.display = 'grid';
+        document.getElementById("menuSidebarOn").style.display = 'inline';
 
         videoShareHolder.style.placeSelf = 'center';
         videoShareHolder.style.width = '85%';
@@ -170,7 +240,8 @@ const screenShareStyles = (id, type) => {
 
         videoShareHolder.srcObject = sharedStream;
         videoShareHolder.muted = true;
-    } else {}
+    } 
+    else {}
 }
 
 
@@ -317,7 +388,7 @@ const thisUserDisconnected = () => {
 const screenShareManipulation = () => {
     socketOwn.on("screenShared", (videoID) => {
 
-        otherScreenShare = true;
+       otherScreenShare = true;
         myPeers.forEach((element) => {
             if(element[2] === videoID){
                 if(document.getElementById(`video_${element[1]}`)){
@@ -365,6 +436,7 @@ export const actions = (name, meetId, socket, errorToast, createPeerVideo, creat
 
         const ownVideo = document.getElementById("ownVideo");
         createOwnVideo(ownVideo);
+        addVideotoSidebar();
 
         screenShareManipulation();
         handleShareScreen(errorToast);

@@ -9,10 +9,11 @@ import {
     VideoHolder,
     ActionHolder,
     Actions,
-    OwnVideo
+    OwnVideo,
+    ParticipantVideo
 } from './ConferenceComponent';
 import { MdTv, MdCallEnd, MdExpandMore, MdSend } from 'react-icons/md';
-import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle } from 'react-icons/bi';
+import { BiCamera, BiCameraOff, BiMicrophoneOff, BiMicrophone, BiErrorCircle, BiWindowClose, BiMenu ,BiX, BiMerge} from 'react-icons/bi';
 import { useToast } from '@chakra-ui/react';
 import { actions } from './actions';
 import Accordion from '@material-ui/core/Accordion';
@@ -92,6 +93,16 @@ const useStyles = makeStyles((theme) => ({
     },
     btnFormMessage: {
         display: 'inline-flex'
+    },
+    onHover: {
+        color: 'black',
+    },
+    menu:{
+        display:'inline',
+        width:'50%',
+        color: 'white',
+        height: '4vh',
+        cursor: 'pointer'
     }
 }));
 
@@ -133,14 +144,20 @@ function Conference({match, history}){
         }
     }
 
+    const copyToClipboard = (linkToCopy) => {
+        navigator.clipboard.writeText(linkToCopy);
+    }
+
     const handleConnectLink = () => {
         if(!toast.isActive(toast_id)){
             toast({
                 id: toast_id,
-                title: "Share Meeting Link",
+                title: "Share Meeting Link (Click For Copy)",
                 description: `http://localhost:3000/join/${match.params.meetId}`,
                 duration: 3000,
-                position: "top-right"
+                position: "top-right",
+                cursor:"pointer",
+                onClick:copyToClipboard(`http://localhost:3000/join/${match.params.meetId}`)
             })
         }
     }
@@ -176,6 +193,13 @@ function Conference({match, history}){
 
         newPart.innerText = name;
         participantHolder.appendChild(newPart);
+    }
+
+    const MouseOver = (event) => {
+        event.target.classList.add(classes.onHover);
+    }
+    const MouseOut = (event) => {
+        event.target.classList.remove(classes.onHover);
     }
 
     const errorToast = (type) => {
@@ -258,26 +282,46 @@ function Conference({match, history}){
                             <BiCamera 
                                 className={classes.iconStyle} 
                                 id="videoOn"
+                                onMouseOver={MouseOver} 
+                                onMouseOut={MouseOut}
                             />
                             <BiCameraOff 
                                 className={classes.iconStyle} 
                                 id="videoOff"
                                 style={{display: "none"}}
+                                onMouseOver={MouseOver} 
+                                onMouseOut={MouseOut}
                             />
                         </div>
                         <div className={classes.iconHolder} id="stopAudio">
                             <BiMicrophone 
                                 className={classes.iconStyle} 
                                 id="audioOn"
+                                onMouseOver={MouseOver} 
+                                onMouseOut={MouseOut}
                             />
                             <BiMicrophoneOff 
                                 className={classes.iconStyle} 
                                 style={{display: "none"}} 
                                 id="audioOff"
+                                onMouseOver={MouseOver} 
+                                onMouseOut={MouseOut}
                             />
                         </div>
-                        <div className={classes.iconHolder}>
-                            <MdTv className={classes.iconStyle} id="shareBtn" />
+                        <div className={classes.iconHolder} id="shareBtn">
+                            <MdTv 
+                                className={classes.iconStyle} 
+                                id="shareScreen" 
+                                onMouseOver={MouseOver} 
+                                onMouseOut={MouseOut}
+                            />
+                            <BiWindowClose 
+                                className={classes.iconStyle} 
+                                style={{display: "none"}} 
+                                id="stopScreen"
+                                onMouseOver={MouseOver} 
+                                onMouseOut={MouseOut}
+                            />
                         </div>
                         <div className={classes.iconHolder}>
                             <MdCallEnd className={classes.iconStyle} style={{color:'#FF474C'}} id="disconnectCall" />
@@ -286,14 +330,24 @@ function Conference({match, history}){
                 </ActionHolder>
             </Holder>
             <Utils className={classes.utils}>
-                <Accordion className={classes.accordionStyles} >
+                <Accordion className={classes.accordionStyles} id="mainLogo">
                     <AccordionSummary>
                         <Typography className={classes.sectionTitle}>
                             Codebugged AI
+                            <BiMenu 
+                                className={classes.menu}
+                                id="menuSidebarOn"
+                                style={{display: "none"}}
+                            />
+                            <BiX 
+                                className={classes.menu} 
+                                id="menuSidebarOff"
+                                style={{display: "none"}}
+                            />
                         </Typography>
                     </AccordionSummary>
                 </Accordion>
-                <Accordion expanded={expanded === 'participants'} onChange={handleChange('participants')} className={classes.accordionStyles}>
+                <Accordion expanded={expanded === 'participants'} onChange={handleChange('participants')} className={classes.accordionStyles} id="removeparticipant">
                     <AccordionSummary
                         expandIcon={<MdExpandMore style={{color: 'white'}} />}
                     >
@@ -303,7 +357,7 @@ function Conference({match, history}){
                         <div id="partList"></div>
                     </AccordionDetails>
                 </Accordion>
-                <Accordion expanded={expanded === 'chatpanel'} className={classes.accordionStyles} onChange={handleChange('chatpanel')}>
+                <Accordion expanded={expanded === 'chatpanel'} className={classes.accordionStyles} onChange={handleChange('chatpanel')} id="removechat">
                     <AccordionSummary
                         expandIcon={<MdExpandMore style={{color: 'white'}} />}
                     >
@@ -326,6 +380,12 @@ function Conference({match, history}){
                         </form>
                     </AccordionDetails>
                 </Accordion>
+            
+
+                <ParticipantVideo id="particpantVideo" style={{display: "none"}}>
+                    
+                </ParticipantVideo>
+                
             </Utils>
         </Container>
     )
